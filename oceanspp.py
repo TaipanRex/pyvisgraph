@@ -2,6 +2,10 @@ import math
 from heapq import heappush, heappop
 from matplotlib import pyplot as plt
 
+'''
+Undirected graph where each vertex is a point tuple and each edge is a vertex tuple
+TODO: Add vertex_neighbours(self, vertex)
+'''
 class Graph:
     
     def __init__(self, graph_dict={}):
@@ -29,7 +33,6 @@ class Graph:
                     edges.append({vertex, neighbour})
         return edges
 
-    #maybe do it as vertex_neighbours?
     def vertex_edges(self, vertex):
         edges = []
         for v in self.__graph_dict[vertex]:
@@ -48,15 +51,22 @@ class Graph:
             res += str(edge) + " "
         return res
 
-def edge_distance(vertex1, vertex2):
-    return math.sqrt((vertex2[0] - vertex1[0])**2 + (vertex2[1] - vertex1[1])**2)
+    '''
+    Returns the Euclidean distance between two vertices.
+    Can take two vertices or an edge as parameters.
+    '''
+    @staticmethod
+    def edge_distance(*args):
+        if len(args) == 1:
+            args = args[0]
+        return math.sqrt((args[1][0] - args[0][0])**2 + (args[1][1] - args[0][1])**2)
 
 #TODO: If two nodes have the same distance, will the algorithm break?
 def shortest_path(graph, ship, port):
     visited = []
     not_visited = graph.vertices()
     not_visited.append(ship)
-    distance = {v:9999 for v in not_visited}
+    distance = {v:float('inf') for v in not_visited}
     distance[port] = 0
 
     #Calculate distances
@@ -69,22 +79,22 @@ def shortest_path(graph, ship, port):
         v = heappop(heap)[1]
         visited.append(v)
         not_visited.remove(v)
-        if distance[v] + edge_distance(v, ship) < distance[ship]:
+        if distance[v] + Graph.edge_distance(v, ship) < distance[ship]:
             # TODO: if visibility between node v and ship
             if v == (8.0, 6.0) or v == (10.0, 1.5): #Temporary solution, manually add those that are visible to ship
                 graph.add_edge((v, ship))
                 ship_edges.append((ship, v))
             for edge in graph.vertex_edges(v):
                 v2 = edge[1]
-                if distance[v2] > distance[v] + edge_distance(v, v2):
-                    distance[v2] = distance[v] + edge_distance(v, v2)
+                if distance[v2] > distance[v] + Graph.edge_distance(v, v2):
+                    distance[v2] = distance[v] + Graph.edge_distance(v, v2)
 
     #Find the shortest path
     path = [ship]
     v = None
     heap = []
     for edge in ship_edges:
-        heappush(heap, (distance[edge[1]] + edge_distance(edge[0], edge[1]), edge))
+        heappush(heap, (distance[edge[1]] + Graph.edge_distance(edge), edge))
     v = heappop(heap)[1][1]
     path.append(v)
 
