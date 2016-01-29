@@ -83,8 +83,8 @@ def shortest_path(graph, ship, port):
     min_value = 9999
     v = None
     for edge in ship_edges:
-        if distance[edge[1]] < min_value:
-            min_value = distance[edge[1]]
+        if distance[edge[1]] + edge_distance(edge[0], edge[1]) < min_value:
+            min_value = distance[edge[1]] + edge_distance(edge[0], edge[1])
             v = edge[1]
     path.append(v)
 
@@ -138,13 +138,14 @@ if __name__ == "__main__":
     
     #Run shortest path algorithm
     port = (1.0, 2.0)
-    ship = (10.0, 2.0)
+    ship = (10.0, 5.5)
     shortest = shortest_path(op_network, ship, port)
 
     #Draw the obstacles and operating network
     fig = plt.figure(1, figsize=(5,5), dpi=90)
     ax = fig.add_subplot(111)
 
+    #TODO: Make a function for drawing edges
     #Draw the obstacles
     for obstacle in obstacles:
         for edge in obstacle.edges():
@@ -155,7 +156,7 @@ if __name__ == "__main__":
                 y.append(vertex[1])
             ax.plot(x, y, color='blue', alpha=0.7, linewidth=3, solid_capstyle='round', zorder=2)
 
-    #TODO: Draw the operating network
+    #Draw the operating network
     for edge in op_network.edges():
         x = []
         y = []
@@ -165,12 +166,8 @@ if __name__ == "__main__":
         ax.plot(x, y, color='red', alpha=0.7, linewidth=1)
 
     #draw shortest path
-    x = []
-    y = []
-    for vertex in shortest:
-        x.append(vertex[0])
-        y.append(vertex[1])
-        ax.plot(x, y, color='green', alpha=0.7, linewidth=2)
+    x,y = zip(*shortest)
+    ax.plot(x, y, color='green', alpha=0.7, linewidth=2)
     
     ax.set_title("ocean shortest path test")
     xrange = [0, 11]
