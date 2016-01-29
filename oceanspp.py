@@ -73,17 +73,20 @@ def shortest_path(graph, ship, port):
     v = None
     ship_edges = []
     while v != ship:
+        # 1) Select the vertex with lowest distance
         heap = []
-        for d in not_visited:
-            heappush(heap, (distance[d], d))
+        for vertex in not_visited:
+            heappush(heap, (distance[vertex], vertex))
         v = heappop(heap)[1]
         visited.append(v)
         not_visited.remove(v)
-        if distance[v] + Graph.edge_distance(v, ship) < distance[ship]:
-            # TODO: if visibility between node v and ship
+        
+        if distance[v] + Graph.edge_distance(v, ship) < distance[ship]: #2) cut off edges to the ship node where there is one that is better
+            # 3) TODO: Check visibility between vertex and ship
             if v == (8.0, 6.0) or v == (10.0, 1.5): #Temporary solution, manually add those that are visible to ship
                 graph.add_edge((v, ship))
                 ship_edges.append((ship, v))
+            # 4) Distance update
             for edge in graph.vertex_edges(v):
                 v2 = edge[1]
                 if distance[v2] > distance[v] + Graph.edge_distance(v, v2):
