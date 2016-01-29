@@ -50,6 +50,7 @@ class Graph:
 def edge_distance(vertex1, vertex2):
     return math.sqrt((vertex2[0] - vertex1[0])**2 + (vertex2[1] - vertex1[1])**2)
 
+#TODO: If two nodes have the same distance, will the algorithm break?
 def shortest_path(graph, ship, port):
     visited = []
     not_visited = graph.vertices()
@@ -69,8 +70,8 @@ def shortest_path(graph, ship, port):
         visited.append(v)
         not_visited.remove(v)
         if distance[v] + edge_distance(v, ship) < distance[ship]:
-            # if visibility between node v and ship:
-            if v == (8.0, 6.0) or v == (10.0, 1.5):
+            # TODO: if visibility between node v and ship
+            if v == (8.0, 6.0) or v == (10.0, 1.5): #Temporary solution, manually add those that are visible to ship
                 graph.add_edge((v, ship))
                 ship_edges.append((ship, v))
             for edge in graph.vertex_edges(v):
@@ -122,16 +123,16 @@ if __name__ == "__main__":
     obstacles = [Graph(obstacle_a), Graph(obstacle_b)]
 
     #TODO: This is the operating network
-    op_graph = { (1.0, 2.0) : [(4.0, 2.5), (1.0, 8.0), (6.0, 1.0)], #A
-                 (4.0, 2.5) : [(1.0, 2.0), (5.0, 3.0)], #B
-                 (5.0, 3.0) : [(4.0, 2.5), (6.0, 1.0), (8.0, 6.0), (4.5, 5.0)], #C
-                 (4.5, 5.0) : [(5.0, 3.0), (4.0, 8.0), (6.0, 1.0)], #D
-                 (4.0, 8.0) : [(4.5, 5.0), (1.0, 8.0), (4.0, 7.0), (8.0, 6.0)], #E
-                 (1.0, 8.0) : [(1.0, 2.0), (4.0, 8.0)], #F
-                 (6.0, 1.0) : [(1.0, 2.0), (5.0, 3.0), (4.5, 5.0), (8.0, 6.0), (10.0, 1.5)], #G
-                 (8.0, 6.0) : [(5.0, 3.0), (4.0, 8.0), (6.0, 1.0), (10.0, 1.5)], #H
-                 (10.0, 1.5) : [(8.0, 6.0), (6.0, 1.0)], #I
-                 (4.0, 7.0) : [(4.0, 8.0)] #J
+    op_graph = { (1.0, 2.0) : [(4.0, 2.5), (1.0, 8.0), (6.0, 1.0)],
+                 (4.0, 2.5) : [(1.0, 2.0), (5.0, 3.0)],
+                 (5.0, 3.0) : [(4.0, 2.5), (6.0, 1.0), (8.0, 6.0), (4.5, 5.0)],
+                 (4.5, 5.0) : [(5.0, 3.0), (4.0, 8.0), (6.0, 1.0)],
+                 (4.0, 8.0) : [(4.5, 5.0), (1.0, 8.0), (4.0, 7.0), (8.0, 6.0)],
+                 (1.0, 8.0) : [(1.0, 2.0), (4.0, 8.0)],
+                 (6.0, 1.0) : [(1.0, 2.0), (5.0, 3.0), (4.5, 5.0), (8.0, 6.0), (10.0, 1.5)],
+                 (8.0, 6.0) : [(5.0, 3.0), (4.0, 8.0), (6.0, 1.0), (10.0, 1.5)],
+                 (10.0, 1.5) : [(8.0, 6.0), (6.0, 1.0)],
+                 (4.0, 7.0) : [(4.0, 8.0)]
                 }
     
     op_network = Graph(op_graph)
@@ -145,24 +146,15 @@ if __name__ == "__main__":
     fig = plt.figure(1, figsize=(5,5), dpi=90)
     ax = fig.add_subplot(111)
 
-    #TODO: Make a function for drawing edges
     #Draw the obstacles
     for obstacle in obstacles:
         for edge in obstacle.edges():
-            x = []
-            y = []
-            for vertex in edge:
-                x.append(vertex[0])
-                y.append(vertex[1])
+            x,y = zip(*edge)
             ax.plot(x, y, color='blue', alpha=0.7, linewidth=3, solid_capstyle='round', zorder=2)
 
     #Draw the operating network
     for edge in op_network.edges():
-        x = []
-        y = []
-        for vertex in edge:
-            x.append(vertex[0])
-            y.append(vertex[1])
+        x,y = zip(*edge)
         ax.plot(x, y, color='red', alpha=0.7, linewidth=1)
 
     #draw shortest path
