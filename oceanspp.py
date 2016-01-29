@@ -1,4 +1,5 @@
 import math
+from heapq import heappush, heappop
 from matplotlib import pyplot as plt
 
 class Graph:
@@ -62,11 +63,10 @@ def shortest_path(graph, ship, port):
     v = None
     ship_edges = []
     while v != ship:
-        min_value = 9999
+        heap = []
         for d in not_visited:
-            if distance[d] < min_value:
-                min_value = distance[d]
-                v = d
+            heappush(heap, (distance[d], d))
+        v = heappop(heap)[1]
         visited.append(v)
         not_visited.remove(v)
         if distance[v] + edge_distance(v, ship) < distance[ship]:
@@ -81,21 +81,18 @@ def shortest_path(graph, ship, port):
 
     #Find the shortest path
     path = [ship]
-    min_value = 9999
     v = None
+    heap = []
     for edge in ship_edges:
-        if distance[edge[1]] + edge_distance(edge[0], edge[1]) < min_value:
-            min_value = distance[edge[1]] + edge_distance(edge[0], edge[1])
-            v = edge[1]
+        heappush(heap, (distance[edge[1]] + edge_distance(edge[0], edge[1]), edge))
+    v = heappop(heap)[1][1]
     path.append(v)
 
     while v != port:
-        min_value = 9999
-        min_edge = None
+        heap = []
         for edge in graph.vertex_edges(v):
-            if distance[edge[1]] < min_value:
-                min_value = distance[edge[1]]
-                min_edge = edge
+            heappush(heap, (distance[edge[1]], edge))
+        min_edge = heappop(heap)[1]
         graph.remove_edge(min_edge[1], (min_edge[1], min_edge[0]))
         path.append(min_edge[1])
         v = min_edge[1]
