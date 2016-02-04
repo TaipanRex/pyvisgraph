@@ -42,6 +42,7 @@ class TestShortestPaths:
                 }
 
     def setup_method(self, method):
+        self.graph = Graph(obstacle_a, obstacle_b)
         self.op_network = Graph(self.op_graph)
 
     def test_shortest_path_1(self):
@@ -49,3 +50,7 @@ class TestShortestPaths:
         port = (1.0, 2.0)
         shortest = shortest_path(self.op_network, ship, port)
         assert str(shortest) == '[(10.0, 5.5), (8.0, 6.0), (5.0, 3.0), (4.0, 2.5), (1.0, 2.0)]'
+
+    #def test_visible_vertices(self):
+    #    v = (1.0,2.0)
+    #    self.op_network.visible_vertices(v, self.graph)
