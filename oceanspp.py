@@ -9,7 +9,12 @@ class Point:
         self.y = y
 
     def __eq__(self, point):
+        if point == None:
+            return False
         return self.x == point.x and self.y == point.y
+
+    def __ne__(self, point):
+        return not self.__eq__(point)
 
     def __str__(self):
         return "(" + str(self.x) + ", " + str(self.y) + ")"
@@ -33,6 +38,9 @@ class Edge:
 
     def __eq__(self, edge):
         return set(self.points) == set(edge.points)
+
+    def __ne__(self, edge):
+        return not self.__eq__(edge)
 
     def __str__(self):
         return "(" + str(self.points[0]) + ", " + str(self.points[1]) + ")"
@@ -135,7 +143,7 @@ def shortest_path(graph, ship, port):
         if distance[point] + edge_distance(point, ship) < distance[ship]:  # 2) cut off edges to the ship node where there is one that is better
             # 3) TODO: Check visibility between vertex and ship
             if point == Point(8.0, 6.0) or point == Point(10.0, 1.5):  # Temporary solution, manually add those that are visible to ship
-                graph.polygons[0].add_edge(Edge(point, ship)) # TODO: Ugly
+                graph.polygons[0].add_edge(Edge(point, ship)) # TODO: Ugly, add separate Edges.
                 ship_edges.append(Edge(ship, point))
             # 4) Distance update
             for edge in graph.get_point_edges(point):
@@ -152,7 +160,7 @@ def shortest_path(graph, ship, port):
     path.append(min_edge)
     point = min_edge.get_point_opposite(ship)
 
-    while (point == port) != True:
+    while point != port:
         for edge in graph.get_point_edges(point):
             if edge not in path:
                 heappush(heap, (distance[edge.get_point_opposite(point)], edge))
