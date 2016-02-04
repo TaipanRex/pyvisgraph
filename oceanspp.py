@@ -20,10 +20,16 @@ class Point:
 class Edge:
 
     def __init__(self, point1, point2):
-        self.points = [point1, point2]
+        self.points = (point1, point2)
 
     def contains(self, point):
         return self.points[0] == point or self.points[1] == point
+
+    def get_point_opposite(self, point):
+        point_opposite = self.points[0]
+        if point == self.points[0]:
+            point_opposite = self.points[1]
+        return point_opposite
 
     def __eq__(self, edge):
         return set(self.points) == set(edge.points)
@@ -87,7 +93,7 @@ class Graph:
     def get_point_edges(self, point):
         edges = []
         for polygon in self.polygons:
-            for edge in polygon:
+            for edge in polygon.edges:
                 if edge.contains(point):
                     edges.append(edge)
         return edges
@@ -99,67 +105,64 @@ class Graph:
             res += str(self.polygons[i])
         return res
 
-    '''
-    Returns the Euclidean distance between two vertices.
-    Can take two vertices or an edge as parameters.
-    '''
 '''
-    @staticmethod
-    def edge_distance(*args):
-        if len(args) == 1:
-            args = args[0]
-        return math.sqrt((args[1][0] - args[0][0])**2 + (args[1][1] - args[0][1])**2)
+Returns the Euclidean distance between two Points.
+'''
+def edge_distance(point1, point2):
+    return math.sqrt((point2.x - point1.x)**2 + (point2.y - point1.y)**2)
+
 
 #TODO: If two nodes have the same distance, will the algorithm break?
 def shortest_path(graph, ship, port):
     visited = []
-    not_visited = graph.vertices()
+    not_visited = graph.get_points()
     not_visited.append(ship)
-    distance = {v:float('inf') for v in not_visited}
+    distance = {point: float('inf') for point in not_visited}
     distance[port] = 0
 
     #Calculate distances
-    v = None
+    point = None
     ship_edges = []
-    while v != ship:
-        # 1) Select the vertex with lowest distance
+    while point != ship:
+        # 1) Select the point with lowest distance
         heap = []
-        for vertex in not_visited:
-            heappush(heap, (distance[vertex], vertex))
-        v = heappop(heap)[1]
-        visited.append(v)
-        not_visited.remove(v)
+        for p in not_visited:
+            heappush(heap, (distance[p], p))
+        point = heappop(heap)[1]
+        visited.append(point)
+        not_visited.remove(point)
 
-        if distance[v] + Graph.edge_distance(v, ship) < distance[ship]:  # 2) cut off edges to the ship node where there is one that is better
+        if distance[point] + edge_distance(point, ship) < distance[ship]:  # 2) cut off edges to the ship node where there is one that is better
             # 3) TODO: Check visibility between vertex and ship
-            if v == (8.0, 6.0) or v == (10.0, 1.5):  # Temporary solution, manually add those that are visible to ship
-                graph.add_edge((v, ship))
-                ship_edges.append((ship, v))
+            if point == Point(8.0, 6.0) or point == Point(10.0, 1.5):  # Temporary solution, manually add those that are visible to ship
+                graph.polygons[0].add_edge(Edge(point, ship)) # TODO: Ugly
+                ship_edges.append(Edge(ship, point))
             # 4) Distance update
-            for edge in graph.vertex_edges(v):
-                v2 = edge[1]
-                if distance[v2] > distance[v] + Graph.edge_distance(v, v2):
-                    distance[v2] = distance[v] + Graph.edge_distance(v, v2)
+            for edge in graph.get_point_edges(point):
+                point2 = edge.get_point_opposite(point)
+                if distance[point2] > distance[point] + edge_distance(point, point2):
+                    distance[point2] = distance[point] + edge_distance(point, point2)
 
     #Find the shortest path
     path = [ship]
-    v = None
+    point = None
     heap = []
     for edge in ship_edges:
-        heappush(heap, (distance[edge[1]] + Graph.edge_distance(edge), edge))
-    v = heappop(heap)[1][1]
-    path.append(v)
+        heappush(heap, (distance[edge.points[1]] + edge_distance(*edge.points), edge))
+    point = heappop(heap)[1].get_point_opposite(ship)
+    path.append(point)
+    print str(path)
 
-    while v != port:
+    while point != port:
         heap = []
-        for edge in graph.vertex_edges(v):
-            heappush(heap, (distance[edge[1]], edge))
+        for edge in graph.get_point_edges(point):
+            #if edge.get_point_opposite(point) not in path:
+            heappush(heap, (distance[edge.get_point_opposite(point)], edge))
         min_edge = heappop(heap)[1]
-        graph.remove_edge(min_edge[1], (min_edge[1], min_edge[0]))
-        path.append(min_edge[1])
-        v = min_edge[1]
+        point = min_edge.get_point_opposite(point)
+        path.append(point)
     return path
-'''
+
 if __name__ == "__main__":
 
     #obstacle A
