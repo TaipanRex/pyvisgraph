@@ -72,12 +72,8 @@ class Polygon:
             self.edges.append(edge)
 
     def __str__(self):
-        res = "Points: "
-        for point in self.points:
-            res += str(point) + ";"
-        res += "\nEdges: "
-        for edge in self.edges:
-            res += str(edge) + "\n"
+        res = "Points: " + ', '.join(str(p) for p in self.points)
+        res += "\nEdges: " + ', '.join(str(e) for e in self.edges)
         return res
 
 class Graph:
@@ -108,9 +104,9 @@ class Graph:
 
     def __str__(self):
         res = ""
-        for i in range(len(self.polygons)):
-            res += "Polygon %d\n" % (i)
-            res += str(self.polygons[i])
+        for i, polygon in enumerate(self.polygons):
+            res += "Polygon %d\n" % i
+            res += str(polygon)
         return res
 
 '''

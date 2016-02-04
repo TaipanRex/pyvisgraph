@@ -144,6 +144,14 @@ class TestUndirectedGraph:
         graph = Graph([polygon_a, polygon_b])
         assert len(graph.get_edges()) == 13
         assert len(graph.get_points()) == 13
+
+    def test_print_graph(self):
+        point_a = (0.0, 1.0)
+        point_b = (2.0, 3.0)
+        edge_a = Edge(point_a, point_b)
+        polygon = Polygon([point_a, point_b], [edge_a])
+        graph = Graph([polygon])
+        assert str(graph) == "Polygon 0\nPoints: (0.0, 1.0), (2.0, 3.0)\nEdges: ((0.0, 1.0), (2.0, 3.0))"
         
 class TestShortestPaths:
 
