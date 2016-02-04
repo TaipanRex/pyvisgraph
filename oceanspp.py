@@ -17,7 +17,7 @@ class Point:
 class Edge:
 
     def __init__(self, point1, point2):
-        self.points = (point1, point2)
+        self.points = [point1, point2]
 
     def contains(self, point):
         return self.points[0] == point or self.points[1] == point
@@ -31,8 +31,14 @@ class Edge:
 class Polygon:
 
     def __init__(self, points, edges):
-        self.points = points
-        self.edges = edges
+        self.points = []
+        self.edges = []
+        for point in points: # add __points
+            if point not in self.points:
+                self.points.append(point)
+        for edge in edges:
+            if edge not in self.edges:
+                self.edges.append(edge)
 
     def add_point(self, point):
         if point not in self.points:
@@ -201,20 +207,67 @@ if __name__ == "__main__":
 
     graph = Graph([polygon_a, polygon_b])
 
-    print graph
-'''
     #TODO: This is the operating network
-    op_graph = { (1.0, 2.0) : [(4.0, 2.5), (1.0, 8.0), (6.0, 1.0)],
-                 (4.0, 2.5) : [(1.0, 2.0), (5.0, 3.0)],
-                 (5.0, 3.0) : [(4.0, 2.5), (6.0, 1.0), (8.0, 6.0), (4.5, 5.0)],
-                 (4.5, 5.0) : [(5.0, 3.0), (4.0, 8.0), (6.0, 1.0)],
-                 (4.0, 8.0) : [(4.5, 5.0), (1.0, 8.0), (4.0, 7.0), (8.0, 6.0)],
-                 (1.0, 8.0) : [(1.0, 2.0), (4.0, 8.0)],
-                 (6.0, 1.0) : [(1.0, 2.0), (5.0, 3.0), (4.5, 5.0), (8.0, 6.0), (10.0, 1.5)],
-                 (8.0, 6.0) : [(5.0, 3.0), (4.0, 8.0), (6.0, 1.0), (10.0, 1.5)],
-                 (10.0, 1.5) : [(8.0, 6.0), (6.0, 1.0)],
-                 (4.0, 7.0) : [(4.0, 8.0)]
+    point_a = Point(1.0, 2.0)
+    point_b = Point(4.0, 2.5)
+    point_c = Point(5.0, 3.0)
+    point_d = Point(4.5, 5.0)
+    point_e = Point(4.0, 8.0)
+    point_f = Point(1.0, 8.0)
+    point_g = Point(6.0, 1.0)
+    point_h = Point(8.0, 6.0)
+    point_i = Point(10.0, 1.5)
+    point_j = Point(4.0, 7.0)
+    points = [point_a, point_b, point_c, point_d, point_e, point_f, point_g, point_h, point_i, point_j]
+
+    edges = []
+    edges.append(Edge(point_a, point_b))
+    edges.append(Edge(point_a, point_f))
+    edges.append(Edge(point_a, point_g))
+    edges.append(Edge(point_b, point_a))
+    edges.append(Edge(point_b, point_c))
+    edges.append(Edge(point_c, point_b))
+    edges.append(Edge(point_c, point_g))
+    edges.append(Edge(point_c, point_h))
+    edges.append(Edge(point_c, point_d))
+    edges.append(Edge(point_d, point_c))
+    edges.append(Edge(point_d, point_e))
+    edges.append(Edge(point_d, point_g))
+    edges.append(Edge(point_e, point_d))
+    edges.append(Edge(point_e, point_f))
+    edges.append(Edge(point_e, point_j))
+    edges.append(Edge(point_e, point_h))
+    edges.append(Edge(point_f, point_a))
+    edges.append(Edge(point_f, point_e))
+    edges.append(Edge(point_g, point_a))
+    edges.append(Edge(point_g, point_c))
+    edges.append(Edge(point_g, point_d))
+    edges.append(Edge(point_g, point_h))
+    edges.append(Edge(point_g, point_i))
+    edges.append(Edge(point_h, point_c))
+    edges.append(Edge(point_h, point_e))
+    edges.append(Edge(point_h, point_g))
+    edges.append(Edge(point_h, point_i))
+    edges.append(Edge(point_i, point_h))
+    edges.append(Edge(point_i, point_g))
+    edges.append(Edge(point_j, point_e))
+
+    op_network = Graph([Polygon(points, edges)])
+    print op_network
+
+'''
+    op_graph = { (1.0, 2.0) : [(4.0, 2.5), (1.0, 8.0), (6.0, 1.0)], #A
+                 (4.0, 2.5) : [(1.0, 2.0), (5.0, 3.0)], #B
+                 (5.0, 3.0) : [(4.0, 2.5), (6.0, 1.0), (8.0, 6.0), (4.5, 5.0)], #C
+                 (4.5, 5.0) : [(5.0, 3.0), (4.0, 8.0), (6.0, 1.0)], #D
+                 (4.0, 8.0) : [(4.5, 5.0), (1.0, 8.0), (4.0, 7.0), (8.0, 6.0)], #E
+                 (1.0, 8.0) : [(1.0, 2.0), (4.0, 8.0)], #F
+                 (6.0, 1.0) : [(1.0, 2.0), (5.0, 3.0), (4.5, 5.0), (8.0, 6.0), (10.0, 1.5)], #G
+                 (8.0, 6.0) : [(5.0, 3.0), (4.0, 8.0), (6.0, 1.0), (10.0, 1.5)], #H
+                 (10.0, 1.5) : [(8.0, 6.0), (6.0, 1.0)], #I
+                 (4.0, 7.0) : [(4.0, 8.0)] #J
                 }
+
     graph = Graph(
     op_network = Graph(op_graph)
 
