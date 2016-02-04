@@ -144,151 +144,24 @@ def shortest_path(graph, ship, port):
                     distance[point2] = distance[point] + edge_distance(point, point2)
 
     #Find the shortest path
-    path = [ship]
-    point = None
+    path = []
     heap = []
     for edge in ship_edges:
-        heappush(heap, (distance[edge.points[1]] + edge_distance(*edge.points), edge))
-    point = heappop(heap)[1].get_point_opposite(ship)
-    path.append(point)
-    print str(path)
+        heappush(heap, (distance[edge.get_point_opposite(ship)] + edge_distance(*edge.points), edge))
+    min_edge = heappop(heap)[1]
+    path.append(min_edge)
+    point = min_edge.get_point_opposite(ship)
 
-    while point != port:
-        heap = []
+    while (point == port) != True:
         for edge in graph.get_point_edges(point):
-            #if edge.get_point_opposite(point) not in path:
-            heappush(heap, (distance[edge.get_point_opposite(point)], edge))
+            if edge not in path:
+                heappush(heap, (distance[edge.get_point_opposite(point)], edge))
         min_edge = heappop(heap)[1]
+        path.append(min_edge)
         point = min_edge.get_point_opposite(point)
-        path.append(point)
     return path
 
-if __name__ == "__main__":
-
-    #obstacle A
-    point_a = Point(1.0, 2.0)
-    point_b = Point(4.0, 2.5)
-    point_c = Point(5.0, 3.0)
-    point_d = Point(4.5, 5.0)
-    point_e = Point(3.0, 5.0)
-    point_f = Point(3.0, 7.0)
-    point_g = Point(4.0, 7.0)
-    point_h = Point(4.0, 8.0)
-    point_i = Point(1.0, 8.0)
-    points = [point_a, point_b, point_c, point_d, point_e, point_f, point_g, point_h, point_i]
-    
-    edges = []
-    edges.append(Edge(point_a, point_b))
-    edges.append(Edge(point_a, point_i))
-    edges.append(Edge(point_b, point_a))
-    edges.append(Edge(point_b, point_c))
-    edges.append(Edge(point_c, point_b))
-    edges.append(Edge(point_c, point_d))
-    edges.append(Edge(point_d, point_c))
-    edges.append(Edge(point_d, point_e))
-    edges.append(Edge(point_e, point_d))
-    edges.append(Edge(point_e, point_f))
-    edges.append(Edge(point_f, point_e))
-    edges.append(Edge(point_f, point_g))
-    edges.append(Edge(point_g, point_f))
-    edges.append(Edge(point_g, point_h))
-    edges.append(Edge(point_h, point_g))
-    edges.append(Edge(point_h, point_i))
-    edges.append(Edge(point_i, point_a))
-    edges.append(Edge(point_i, point_h))
-    
-    polygon_a = Polygon(points, edges)
-    
-    #obstacle B
-    point_a = Point(6.0, 1.0)
-    point_b = Point(7.0, 2.0)
-    point_c = Point(8.0, 6.0)
-    point_d = Point(10.0, 1.5)
-    points = [point_a, point_b, point_c, point_d]
-
-    edges = []
-    edges.append(Edge(point_a, point_b))
-    edges.append(Edge(point_a, point_d))
-    edges.append(Edge(point_b, point_a))
-    edges.append(Edge(point_b, point_c))
-    edges.append(Edge(point_c, point_b))
-    edges.append(Edge(point_c, point_d))
-    edges.append(Edge(point_d, point_a))
-    edges.append(Edge(point_d, point_c))
-
-    polygon_b = Polygon(points, edges)
-
-    graph = Graph([polygon_a, polygon_b])
-
-    #TODO: This is the operating network
-    point_a = Point(1.0, 2.0)
-    point_b = Point(4.0, 2.5)
-    point_c = Point(5.0, 3.0)
-    point_d = Point(4.5, 5.0)
-    point_e = Point(4.0, 8.0)
-    point_f = Point(1.0, 8.0)
-    point_g = Point(6.0, 1.0)
-    point_h = Point(8.0, 6.0)
-    point_i = Point(10.0, 1.5)
-    point_j = Point(4.0, 7.0)
-    points = [point_a, point_b, point_c, point_d, point_e, point_f, point_g, point_h, point_i, point_j]
-
-    edges = []
-    edges.append(Edge(point_a, point_b))
-    edges.append(Edge(point_a, point_f))
-    edges.append(Edge(point_a, point_g))
-    edges.append(Edge(point_b, point_a))
-    edges.append(Edge(point_b, point_c))
-    edges.append(Edge(point_c, point_b))
-    edges.append(Edge(point_c, point_g))
-    edges.append(Edge(point_c, point_h))
-    edges.append(Edge(point_c, point_d))
-    edges.append(Edge(point_d, point_c))
-    edges.append(Edge(point_d, point_e))
-    edges.append(Edge(point_d, point_g))
-    edges.append(Edge(point_e, point_d))
-    edges.append(Edge(point_e, point_f))
-    edges.append(Edge(point_e, point_j))
-    edges.append(Edge(point_e, point_h))
-    edges.append(Edge(point_f, point_a))
-    edges.append(Edge(point_f, point_e))
-    edges.append(Edge(point_g, point_a))
-    edges.append(Edge(point_g, point_c))
-    edges.append(Edge(point_g, point_d))
-    edges.append(Edge(point_g, point_h))
-    edges.append(Edge(point_g, point_i))
-    edges.append(Edge(point_h, point_c))
-    edges.append(Edge(point_h, point_e))
-    edges.append(Edge(point_h, point_g))
-    edges.append(Edge(point_h, point_i))
-    edges.append(Edge(point_i, point_h))
-    edges.append(Edge(point_i, point_g))
-    edges.append(Edge(point_j, point_e))
-
-    op_network = Graph([Polygon(points, edges)])
-    print op_network
-
 '''
-    op_graph = { (1.0, 2.0) : [(4.0, 2.5), (1.0, 8.0), (6.0, 1.0)], #A
-                 (4.0, 2.5) : [(1.0, 2.0), (5.0, 3.0)], #B
-                 (5.0, 3.0) : [(4.0, 2.5), (6.0, 1.0), (8.0, 6.0), (4.5, 5.0)], #C
-                 (4.5, 5.0) : [(5.0, 3.0), (4.0, 8.0), (6.0, 1.0)], #D
-                 (4.0, 8.0) : [(4.5, 5.0), (1.0, 8.0), (4.0, 7.0), (8.0, 6.0)], #E
-                 (1.0, 8.0) : [(1.0, 2.0), (4.0, 8.0)], #F
-                 (6.0, 1.0) : [(1.0, 2.0), (5.0, 3.0), (4.5, 5.0), (8.0, 6.0), (10.0, 1.5)], #G
-                 (8.0, 6.0) : [(5.0, 3.0), (4.0, 8.0), (6.0, 1.0), (10.0, 1.5)], #H
-                 (10.0, 1.5) : [(8.0, 6.0), (6.0, 1.0)], #I
-                 (4.0, 7.0) : [(4.0, 8.0)] #J
-                }
-
-    graph = Graph(
-    op_network = Graph(op_graph)
-
-    #Run shortest path algorithm
-    port = (1.0, 2.0)
-    ship = (10.0, 5.5)
-    shortest = shortest_path(op_network, ship, port)
-
     #Draw the obstacles and operating network
     fig = plt.figure(1, figsize=(5,5), dpi=90)
     ax = fig.add_subplot(111)

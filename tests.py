@@ -155,7 +155,11 @@ class TestShortestPaths:
         ship = Point(10.0, 5.5)
         port = Point(1.0, 2.0)
         shortest = shortest_path(self.op_graph, ship, port)
-        assert str(shortest) == '[(10.0, 5.5), (8.0, 6.0), (5.0, 3.0), (4.0, 2.5), (1.0, 2.0)]'
+        edge_a = Edge(ship, Point(8.0, 6.0))
+        edge_b = Edge(Point(8.0, 6.0), Point(5.0, 3.0))
+        edge_c = Edge(Point(5.0, 3.0), Point(4.0, 2.5))
+        edge_d = Edge(Point(4.0, 2.5), Point(1.0, 2.0))
+        assert shortest == [edge_a, edge_b, edge_c, edge_d]
 
     #def test_visible_vertices(self):
     #    v = (1.0,2.0)
