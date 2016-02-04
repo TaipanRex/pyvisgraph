@@ -14,6 +14,9 @@ class Point:
     def __str__(self):
         return "(" + str(self.x) + ", " + str(self.y) + ")"
 
+    def __hash__(self):
+        return self.x.__hash__() + self.y.__hash__()
+
 class Edge:
 
     def __init__(self, point1, point2):
@@ -27,6 +30,12 @@ class Edge:
 
     def __str__(self):
         return "(" + str(self.points[0]) + ", " + str(self.points[1]) + ")"
+
+    def __hash__(self):
+        hash_val = 0
+        for point in self.points:
+            hash_val += point.__hash__()
+        return hash_val
 
 class Polygon:
 
@@ -59,6 +68,7 @@ class Polygon:
 
 class Graph:
 
+    # TODO: polygons is a list of polygons, what if only one polygon is added i.e not a list?
     def __init__(self, polygons):
         self.polygons = polygons
 
