@@ -1,5 +1,4 @@
 import math
-from heapq import heappush, heappop
 from matplotlib import pyplot as plt
 
 class Point:
@@ -130,10 +129,7 @@ def shortest_path(graph, ship, port):
     ship_edges = []
     while point != ship:
         # 1) Select the point with lowest distance
-        heap = []
-        for p in not_visited:
-            heappush(heap, (distance[p], p))
-        point = heappop(heap)[1]
+        point = min(not_visited, key=lambda p: distance[p])
         visited.append(point)
         not_visited.remove(point)
 
@@ -150,22 +146,16 @@ def shortest_path(graph, ship, port):
 
     #Find the shortest path
     path = []
-    heap = []
-    for edge in ship_edges:
-        heappush(heap, (distance[edge.get_adjacent(ship)] + edge_distance(*edge.points), edge))
-    min_edge = heappop(heap)[1]
+    min_edge = min(ship_edges, key=lambda e: distance[e.get_adjacent(ship)] + edge_distance(*e.points))
     path.append(min_edge)
     point = min_edge.get_adjacent(ship)
 
     while point != port:
-        for edge in graph.get_point_edges(point):
-            if edge not in path:
-                heappush(heap, (distance[edge.get_adjacent(point)], edge))
-        min_edge = heappop(heap)[1]
+        min_edge = min(graph.get_point_edges(point), key=lambda e: distance[edge.get_adjacent(point)])
         path.append(min_edge)
         point = min_edge.get_adjacent(point)
     return path
-
+    
 '''
     #Draw the obstacles and operating network
     fig = plt.figure(1, figsize=(5,5), dpi=90)
