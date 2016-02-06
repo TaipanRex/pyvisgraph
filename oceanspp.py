@@ -20,6 +20,7 @@ class Point:
         return "(" + str(self.x) + ", " + str(self.y) + ")"
 
     def __hash__(self):
+        # TODO: Will this mess something up with Edge comparison? if one point is x, y and other y, x?
         return self.x.__hash__() + self.y.__hash__()
 
 class Edge:
@@ -30,11 +31,11 @@ class Edge:
     def contains(self, point):
         return self.points[0] == point or self.points[1] == point
 
-    def get_point_opposite(self, point):
-        point_opposite = self.points[0]
-        if point == self.points[0]:
-            point_opposite = self.points[1]
-        return point_opposite
+    def get_adjacent(self, point):
+        point_a, point_b = self.points
+        if point == point_a:
+            return point_b
+        return point_a
 
     def __eq__(self, edge):
         return set(self.points) == set(edge.points)
@@ -143,7 +144,7 @@ def shortest_path(graph, ship, port):
                 ship_edges.append(Edge(ship, point))
             # 4) Distance update
             for edge in graph.get_point_edges(point):
-                point2 = edge.get_point_opposite(point)
+                point2 = edge.get_adjacent(point)
                 if distance[point2] > distance[point] + edge_distance(point, point2):
                     distance[point2] = distance[point] + edge_distance(point, point2)
 
@@ -151,18 +152,18 @@ def shortest_path(graph, ship, port):
     path = []
     heap = []
     for edge in ship_edges:
-        heappush(heap, (distance[edge.get_point_opposite(ship)] + edge_distance(*edge.points), edge))
+        heappush(heap, (distance[edge.get_adjacent(ship)] + edge_distance(*edge.points), edge))
     min_edge = heappop(heap)[1]
     path.append(min_edge)
-    point = min_edge.get_point_opposite(ship)
+    point = min_edge.get_adjacent(ship)
 
     while point != port:
         for edge in graph.get_point_edges(point):
             if edge not in path:
-                heappush(heap, (distance[edge.get_point_opposite(point)], edge))
+                heappush(heap, (distance[edge.get_adjacent(point)], edge))
         min_edge = heappop(heap)[1]
         path.append(min_edge)
-        point = min_edge.get_point_opposite(point)
+        point = min_edge.get_adjacent(point)
     return path
 
 '''
