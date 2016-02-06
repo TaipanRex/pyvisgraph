@@ -1,4 +1,5 @@
 from oceanspp import Graph, Point, Edge, Polygon, shortest_path, angle
+from oceanspp import edge_intersect
 import pytest
 from math import pi, degrees
 
@@ -13,166 +14,206 @@ setup_class(cls):
 setup_method(self, method):
 
 '''
-# test obstacle A
-point_a = Point(1.0, 2.0)
-point_b = Point(4.0, 2.5)
-point_c = Point(5.0, 3.0)
-point_d = Point(4.5, 5.0)
-point_e = Point(3.0, 5.0)
-point_f = Point(3.0, 7.0)
-point_g = Point(4.0, 7.0)
-point_h = Point(4.0, 8.0)
-point_i = Point(1.0, 8.0)
-points = [point_a, point_b, point_c, point_d, point_e, point_f, point_g, point_h, point_i]
-
-edges = []
-edges.append(Edge(point_a, point_b))
-edges.append(Edge(point_a, point_i))
-edges.append(Edge(point_b, point_a))
-edges.append(Edge(point_b, point_c))
-edges.append(Edge(point_c, point_b))
-edges.append(Edge(point_c, point_d))
-edges.append(Edge(point_d, point_c))
-edges.append(Edge(point_d, point_e))
-edges.append(Edge(point_e, point_d))
-edges.append(Edge(point_e, point_f))
-edges.append(Edge(point_f, point_e))
-edges.append(Edge(point_f, point_g))
-edges.append(Edge(point_g, point_f))
-edges.append(Edge(point_g, point_h))
-edges.append(Edge(point_h, point_g))
-edges.append(Edge(point_h, point_i))
-edges.append(Edge(point_i, point_a))
-edges.append(Edge(point_i, point_h))
-
-polygon_a = Polygon(points, edges)
-
-# test obstacle B
-point_a = Point(6.0, 1.0)
-point_b = Point(7.0, 2.0)
-point_c = Point(8.0, 6.0)
-point_d = Point(10.0, 1.5)
-points = [point_a, point_b, point_c, point_d]
-
-edges = []
-edges.append(Edge(point_a, point_b))
-edges.append(Edge(point_a, point_d))
-edges.append(Edge(point_b, point_a))
-edges.append(Edge(point_b, point_c))
-edges.append(Edge(point_c, point_b))
-edges.append(Edge(point_c, point_d))
-edges.append(Edge(point_d, point_a))
-edges.append(Edge(point_d, point_c))
-
-polygon_b = Polygon(points, edges)
-
-# test operating network
-point_a = Point(1.0, 2.0)
-point_b = Point(4.0, 2.5)
-point_c = Point(5.0, 3.0)
-point_d = Point(4.5, 5.0)
-point_e = Point(4.0, 8.0)
-point_f = Point(1.0, 8.0)
-point_g = Point(6.0, 1.0)
-point_h = Point(8.0, 6.0)
-point_i = Point(10.0, 1.5)
-point_j = Point(4.0, 7.0)
-points = [point_a, point_b, point_c, point_d, point_e, point_f, point_g, point_h, point_i, point_j]
-
-edges = []
-edges.append(Edge(point_a, point_b))
-edges.append(Edge(point_a, point_f))
-edges.append(Edge(point_a, point_g))
-edges.append(Edge(point_b, point_a))
-edges.append(Edge(point_b, point_c))
-edges.append(Edge(point_c, point_b))
-edges.append(Edge(point_c, point_g))
-edges.append(Edge(point_c, point_h))
-edges.append(Edge(point_c, point_d))
-edges.append(Edge(point_d, point_c))
-edges.append(Edge(point_d, point_e))
-edges.append(Edge(point_d, point_g))
-edges.append(Edge(point_e, point_d))
-edges.append(Edge(point_e, point_f))
-edges.append(Edge(point_e, point_j))
-edges.append(Edge(point_e, point_h))
-edges.append(Edge(point_f, point_a))
-edges.append(Edge(point_f, point_e))
-edges.append(Edge(point_g, point_a))
-edges.append(Edge(point_g, point_c))
-edges.append(Edge(point_g, point_d))
-edges.append(Edge(point_g, point_h))
-edges.append(Edge(point_g, point_i))
-edges.append(Edge(point_h, point_c))
-edges.append(Edge(point_h, point_e))
-edges.append(Edge(point_h, point_g))
-edges.append(Edge(point_h, point_i))
-edges.append(Edge(point_i, point_h))
-edges.append(Edge(point_i, point_g))
-edges.append(Edge(point_j, point_e))
-
-op_network = Polygon(points, edges)
 
 class TestUndirectedGraph:
 
-    def test_point_equality(self):
-        point_a = Point(0.0, 1.0)
-        point_b = Point(0.0, 1.0)
-        assert point_a == point_b
+    def setup_method(self, method):
+        self.point_a = Point(0.0, 1.0)
+        self.point_b = Point(1.0, 2.0)
+        self.point_c = Point(0.0, 1.0)
+        self.point_d = Point(1.0, 2.0)
+        self.edge_a = Edge(self.point_a, self.point_b)
+        self.edge_b = Edge(self.point_b, self.point_a)
+        self.edge_c = Edge(self.point_c, self.point_d)
+        self.edge_d = Edge(self.point_d, self.point_c)
 
-        point_c = Point(1.0, 0.0)
-        assert point_b != point_c
+    def test_point_equality_1(self):
+        point = Point(0.0, 1.0)
+        assert self.point_a == point
 
-    def test_edge_equality(self):
-        point_a = Point(0.0, 1.0)
-        point_b = Point(1.0, 2.0)
-        point_c = Point(0.0, 1.0)
-        point_d = Point(1.0, 2.0)
-        edge_a = Edge(point_a, point_b)
-        edge_b = Edge(point_b, point_a)
-        edge_c = Edge(point_c, point_d)
-        edge_d = Edge(point_d, point_c)
-        assert edge_a == edge_b
-        assert edge_a == edge_a
-        assert edge_a == edge_c
-        assert edge_a == edge_d
+    def test_point_equality_2(self):
+        point = Point(1.0, 0.0)
+        assert self.point_a != point
 
-    '''
-    Test that Polygon Edge Point order does not matter, i.e
-    (point a, point b) == (point b, point a)
-    '''
+    def test_edge_equality_1(self):
+        assert self.edge_a == self.edge_b
+
+    def test_edge_equality_2(self):
+        assert self.edge_a == self.edge_a
+
+    def test_edge_equality_3(self):
+        assert self.edge_a == self.edge_c
+
+    def test_edge_equality_4(self):
+        assert self.edge_a == self.edge_d
+
     def test_polygon_duplicate_edges(self):
-        point_a = Point(0.0, 1.0)
-        point_b = Point(2.0, 3.0)
-        edge_a = Edge(point_a, point_b)
-        edge_b = Edge(point_b, point_a)
-        polygon = Polygon([point_a, point_b], [edge_a, edge_b])
+        polygon = Polygon([self.point_a, self.point_b],
+            [self.edge_a, self.edge_b])
         assert len(polygon.edges) == 1
 
     def test_polygon_duplicate_points(self):
-        point_a = Point(0.0, 1.0)
-        point_b = Point(2.0, 3.0)
-        polygon = Polygon([point_a, point_b, point_a], [])
+        polygon = Polygon([self.point_a, self.point_b, self.point_a], [])
         assert len(polygon.points) == 2
 
-    def test_graph_duplicate_points_edges(self):
-        graph = Graph([polygon_a, polygon_b])
-        assert len(graph.get_edges()) == 13
-        assert len(graph.get_points()) == 13
-
     def test_print_graph(self):
-        point_a = Point(0.0, 1.0)
-        point_b = Point(2.0, 3.0)
-        edge_a = Edge(point_a, point_b)
-        polygon = Polygon([point_a, point_b], [edge_a])
+        polygon = Polygon([self.point_a, self.point_b], [self.edge_a])
         graph = Graph([polygon])
-        assert str(graph) == "Polygon 0\nPoints: (0.0, 1.0), (2.0, 3.0)\nEdges: ((0.0, 1.0), (2.0, 3.0))"
+        assert str(graph) == "Polygon 0\nPoints: (0.0, 1.0), (1.0, 2.0)\nEdges: ((0.0, 1.0), (1.0, 2.0))"
+
+
+class TestAngleFunction:
+    def setup_method(self, method):
+        self.center = Point(1.0, 1.0)
+        self.point_a = Point(3.0, 1.0)
+        self.point_b = Point(1.0, 0)
+        self.point_c = Point(0.0, 2.0)
+        self.point_d = Point(2.0, 2.0)
+        self.point_e = Point(2.0, 0.0)
+        self.point_f = Point(0.0, 0.0)
+
+    def test_angle_1(self):
+        assert angle(self.center, self.point_a) == 0
+
+    def test_angle_2(self):
+        assert angle(self.center, self.point_b) == pi*3 / 2
+
+    def test_angle_3(self):
+        assert degrees(angle(self.center, self.point_c)) == 135
+
+    def test_angle_4(self):
+        assert degrees(angle(self.center, self.point_d)) == 45
+
+    def test_angle_4(self):
+        assert degrees(angle(self.center, self.point_e)) == 315
+
+    def test_angle_5(self):
+        assert degrees(angle(self.center, self.point_f)) == 225
+
+class TestEdgeIntersectFunction:
+
+    def setup_method(self, method):
+        self.point_a = Point(3.0, 5.0)
+        self.point_b = Point(5.0, 3.0)
+        self.point_c = Point(4.0, 2.0)
+        self.point_d = Point(4.0, 5.0)
+        self.point_e = Point(5.0, 4.0)
+        self.edge = Edge(self.point_a, self.point_b)
+
+    def test_edge_intersect_1(self):
+        assert edge_intersect(self.point_c, self.point_d, self.edge) == True
+
+    def test_edge_intersect_2(self):
+        assert edge_intersect(self.point_c, self.point_e, self.edge) == True
 
 class TestShortestPaths:
 
     def setup_method(self, method):
-        self.graph = Graph([polygon_a, polygon_b])
-        self.op_graph = Graph([op_network])
+        # test obstacle A
+        self.point_a = Point(1.0, 2.0)
+        self.point_b = Point(4.0, 2.5)
+        self.point_c = Point(5.0, 3.0)
+        self.point_d = Point(4.5, 5.0)
+        self.point_e = Point(3.0, 5.0)
+        self.point_f = Point(3.0, 7.0)
+        self.point_g = Point(4.0, 7.0)
+        self.point_h = Point(4.0, 8.0)
+        self.point_i = Point(1.0, 8.0)
+        self.points = [self.point_a, self.point_b, self.point_c, self.point_d,
+            self.point_e, self.point_f, self.point_g, self.point_h,
+            self.point_i]
+
+        self.edges = []
+        self.edges.append(Edge(self.point_a, self.point_b))
+        self.edges.append(Edge(self.point_a, self.point_i))
+        self.edges.append(Edge(self.point_b, self.point_a))
+        self.edges.append(Edge(self.point_b, self.point_c))
+        self.edges.append(Edge(self.point_c, self.point_b))
+        self.edges.append(Edge(self.point_c, self.point_d))
+        self.edges.append(Edge(self.point_d, self.point_c))
+        self.edges.append(Edge(self.point_d, self.point_e))
+        self.edges.append(Edge(self.point_e, self.point_d))
+        self.edges.append(Edge(self.point_e, self.point_f))
+        self.edges.append(Edge(self.point_f, self.point_e))
+        self.edges.append(Edge(self.point_f, self.point_g))
+        self.edges.append(Edge(self.point_g, self.point_f))
+        self.edges.append(Edge(self.point_g, self.point_h))
+        self.edges.append(Edge(self.point_h, self.point_g))
+        self.edges.append(Edge(self.point_h, self.point_i))
+        self.edges.append(Edge(self.point_i, self.point_a))
+        self.edges.append(Edge(self.point_i, self.point_h))
+
+        self.polygon_a = Polygon(self.points, self.edges)
+
+        # test obstacle B
+        self.point_a = Point(6.0, 1.0)
+        self.point_b = Point(7.0, 2.0)
+        self.point_c = Point(8.0, 6.0)
+        self.point_d = Point(10.0, 1.5)
+        self.points = [self.point_a, self.point_b, self.point_c, self.point_d]
+
+        self.edges = []
+        self.edges.append(Edge(self.point_a, self.point_b))
+        self.edges.append(Edge(self.point_a, self.point_d))
+        self.edges.append(Edge(self.point_b, self.point_a))
+        self.edges.append(Edge(self.point_b, self.point_c))
+        self.edges.append(Edge(self.point_c, self.point_b))
+        self.edges.append(Edge(self.point_c, self.point_d))
+        self.edges.append(Edge(self.point_d, self.point_a))
+        self.edges.append(Edge(self.point_d, self.point_c))
+
+        self.polygon_b = Polygon(self.points, self.edges)
+
+        # test operating network
+        self.point_a = Point(1.0, 2.0)
+        self.point_b = Point(4.0, 2.5)
+        self.point_c = Point(5.0, 3.0)
+        self.point_d = Point(4.5, 5.0)
+        self.point_e = Point(4.0, 8.0)
+        self.point_f = Point(1.0, 8.0)
+        self.point_g = Point(6.0, 1.0)
+        self.point_h = Point(8.0, 6.0)
+        self.point_i = Point(10.0, 1.5)
+        self.point_j = Point(4.0, 7.0)
+        self.points = [self.point_a, self.point_b, self.point_c, self.point_d,
+            self.point_e, self.point_f, self.point_g, self.point_h,
+            self.point_i, self.point_j]
+
+        self.edges = []
+        self.edges.append(Edge(self.point_a, self.point_b))
+        self.edges.append(Edge(self.point_a, self.point_f))
+        self.edges.append(Edge(self.point_a, self.point_g))
+        self.edges.append(Edge(self.point_b, self.point_a))
+        self.edges.append(Edge(self.point_b, self.point_c))
+        self.edges.append(Edge(self.point_c, self.point_b))
+        self.edges.append(Edge(self.point_c, self.point_g))
+        self.edges.append(Edge(self.point_c, self.point_h))
+        self.edges.append(Edge(self.point_c, self.point_d))
+        self.edges.append(Edge(self.point_d, self.point_c))
+        self.edges.append(Edge(self.point_d, self.point_e))
+        self.edges.append(Edge(self.point_d, self.point_g))
+        self.edges.append(Edge(self.point_e, self.point_d))
+        self.edges.append(Edge(self.point_e, self.point_f))
+        self.edges.append(Edge(self.point_e, self.point_j))
+        self.edges.append(Edge(self.point_e, self.point_h))
+        self.edges.append(Edge(self.point_f, self.point_a))
+        self.edges.append(Edge(self.point_f, self.point_e))
+        self.edges.append(Edge(self.point_g, self.point_a))
+        self.edges.append(Edge(self.point_g, self.point_c))
+        self.edges.append(Edge(self.point_g, self.point_d))
+        self.edges.append(Edge(self.point_g, self.point_h))
+        self.edges.append(Edge(self.point_g, self.point_i))
+        self.edges.append(Edge(self.point_h, self.point_c))
+        self.edges.append(Edge(self.point_h, self.point_e))
+        self.edges.append(Edge(self.point_h, self.point_g))
+        self.edges.append(Edge(self.point_h, self.point_i))
+        self.edges.append(Edge(self.point_i, self.point_h))
+        self.edges.append(Edge(self.point_i, self.point_g))
+        self.edges.append(Edge(self.point_j, self.point_e))
+
+        self.op_network = Polygon(self.points, self.edges)
+        self.graph = Graph([self.polygon_a, self.polygon_b])
+        self.op_graph = Graph([self.op_network])
 
     def test_shortest_path_1(self):
         ship = Point(10.0, 5.5)
@@ -183,20 +224,3 @@ class TestShortestPaths:
         edge_c = Edge(Point(5.0, 3.0), Point(4.0, 2.5))
         edge_d = Edge(Point(4.0, 2.5), Point(1.0, 2.0))
         assert shortest == [edge_a, edge_b, edge_c, edge_d]
-
-class TestVisibilityGraph:
-
-    def test_angle(self):
-        center = Point(1.0, 1.0)
-        point_a = Point(3.0, 1.0)
-        point_b = Point(1.0, 0)
-        point_c = Point(0.0, 2.0)
-        point_d = Point(2.0, 2.0)
-        point_e = Point(2.0, 0.0)
-        point_f = Point(0.0, 0.0)
-        assert angle(center, point_a) == 0
-        assert angle(center, point_b) == pi*3 / 2
-        assert degrees(angle(center, point_c)) == 135
-        assert degrees(angle(center, point_d)) == 45
-        assert degrees(angle(center, point_e)) == 315
-        assert degrees(angle(center, point_f)) == 225

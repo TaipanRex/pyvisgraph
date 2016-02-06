@@ -103,19 +103,24 @@ class Graph:
         return edges
 
     def __str__(self):
-        res = ""
+        s = ""
         for i, polygon in enumerate(self.polygons):
-            res += "Polygon %d\n" % i
-            res += str(polygon)
-        return res
+            s += "Polygon %d\n" % i
+            s += str(polygon)
+        return s
 
-'''
-Returns the Euclidean distance between two Points.
-'''
 def edge_distance(point1, point2):
-    return sqrt((point2.x - point1.x)**2 + (point2.y - point1.y)**2)
+    """
+    Return the Euclidean distance between two Points.
+    """
+    return sqrt((point2.x - point1.x)**2
+                + (point2.y - point1.y)**2)
 
 def angle(center, point):
+    """
+    Return the angle of 'point' where 'center' is the center of
+    the radian circle.
+    """
     dx = point.x - center.x
     dy = point.y - center.y
 
@@ -136,6 +141,23 @@ def angle(center, point):
         return 2*pi + atan(dy/dx)
 
     return atan(dy/dx)
+
+def edge_intersect(point1, point2, edge):
+    """
+    Return True if 'edge' is interesected by the line going
+    through 'point1' and 'point2', False otherwise.
+    If edge contains either 'point1' or 'point2', return False.
+    """
+    edge_point1, edge_point2 = edge.points
+    if edge.contains(point1) or edge.contains(point2):
+        return False
+
+    if point1.x == point2.x:
+        x1_left = edge_point1.x < point1.x
+        x2_left = edge_point2.x < point1.x
+        return not (x1_left == x2_left)
+
+    return "a"
 
 #TODO: If two nodes have the same distance, will the algorithm break?
 def shortest_path(graph, ship, port):
