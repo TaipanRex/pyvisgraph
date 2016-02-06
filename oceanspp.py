@@ -28,7 +28,7 @@ class Edge:
         self.points = (point1, point2)
 
     def contains(self, point):
-        return self.points[0] == point or self.points[1] == point
+        return point in self.points
 
     def get_adjacent(self, point):
         point_a, point_b = self.points
@@ -43,7 +43,7 @@ class Edge:
         return not self.__eq__(edge)
 
     def __str__(self):
-        return "(" + str(self.points[0]) + ", " + str(self.points[1]) + ")"
+        return "(" + ", ".join(str(p) for p in self.points) + ")"
 
     def __hash__(self):
         hash_val = 0
@@ -56,7 +56,7 @@ class Polygon:
     def __init__(self, points, edges):
         self.points = []
         self.edges = []
-        for point in points: # add __points
+        for point in points:
             if point not in self.points:
                 self.points.append(point)
         for edge in edges:

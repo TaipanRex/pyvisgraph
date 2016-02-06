@@ -122,6 +122,20 @@ class TestUndirectedGraph:
         point_c = Point(1.0, 0.0)
         assert point_b != point_c
 
+    def test_edge_equality(self):
+        point_a = Point(0.0, 1.0)
+        point_b = Point(1.0, 2.0)
+        point_c = Point(0.0, 1.0)
+        point_d = Point(1.0, 2.0)
+        edge_a = Edge(point_a, point_b)
+        edge_b = Edge(point_b, point_a)
+        edge_c = Edge(point_c, point_d)
+        edge_d = Edge(point_d, point_c)
+        assert edge_a == edge_b
+        assert edge_a == edge_a
+        assert edge_a == edge_c
+        assert edge_a == edge_d
+
     '''
     Test that Polygon Edge Point order does not matter, i.e
     (point a, point b) == (point b, point a)
