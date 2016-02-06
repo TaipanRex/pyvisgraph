@@ -1,5 +1,6 @@
-from oceanspp import Graph, Point, Edge, Polygon, shortest_path
+from oceanspp import Graph, Point, Edge, Polygon, shortest_path, angle
 import pytest
+from math import pi, degrees
 
 '''
 setup_module(module): only run once when file is executed
@@ -141,16 +142,16 @@ class TestUndirectedGraph:
     (point a, point b) == (point b, point a)
     '''
     def test_polygon_duplicate_edges(self):
-        point_a = (0.0, 1.0)
-        point_b = (2.0, 3.0)
+        point_a = Point(0.0, 1.0)
+        point_b = Point(2.0, 3.0)
         edge_a = Edge(point_a, point_b)
         edge_b = Edge(point_b, point_a)
         polygon = Polygon([point_a, point_b], [edge_a, edge_b])
         assert len(polygon.edges) == 1
 
     def test_polygon_duplicate_points(self):
-        point_a = (0.0, 1.0)
-        point_b = (2.0, 3.0)
+        point_a = Point(0.0, 1.0)
+        point_b = Point(2.0, 3.0)
         polygon = Polygon([point_a, point_b, point_a], [])
         assert len(polygon.points) == 2
 
@@ -160,13 +161,13 @@ class TestUndirectedGraph:
         assert len(graph.get_points()) == 13
 
     def test_print_graph(self):
-        point_a = (0.0, 1.0)
-        point_b = (2.0, 3.0)
+        point_a = Point(0.0, 1.0)
+        point_b = Point(2.0, 3.0)
         edge_a = Edge(point_a, point_b)
         polygon = Polygon([point_a, point_b], [edge_a])
         graph = Graph([polygon])
         assert str(graph) == "Polygon 0\nPoints: (0.0, 1.0), (2.0, 3.0)\nEdges: ((0.0, 1.0), (2.0, 3.0))"
-        
+
 class TestShortestPaths:
 
     def setup_method(self, method):
@@ -183,6 +184,19 @@ class TestShortestPaths:
         edge_d = Edge(Point(4.0, 2.5), Point(1.0, 2.0))
         assert shortest == [edge_a, edge_b, edge_c, edge_d]
 
-    #def test_visible_vertices(self):
-    #    v = (1.0,2.0)
-    #    self.op_network.visible_vertices(v, self.graph)
+class TestVisibilityGraph:
+
+    def test_angle(self):
+        center = Point(1.0, 1.0)
+        point_a = Point(3.0, 1.0)
+        point_b = Point(1.0, 0)
+        point_c = Point(0.0, 2.0)
+        point_d = Point(2.0, 2.0)
+        point_e = Point(2.0, 0.0)
+        point_f = Point(0.0, 0.0)
+        assert angle(center, point_a) == 0
+        assert angle(center, point_b) == pi*3 / 2
+        assert degrees(angle(center, point_c)) == 135
+        assert degrees(angle(center, point_d)) == 45
+        assert degrees(angle(center, point_e)) == 315
+        assert degrees(angle(center, point_f)) == 225

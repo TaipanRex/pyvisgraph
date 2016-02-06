@@ -1,8 +1,8 @@
-import math
+from math import pi, sqrt, atan
 from matplotlib import pyplot as plt
 
 class Point:
-    
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -113,8 +113,29 @@ class Graph:
 Returns the Euclidean distance between two Points.
 '''
 def edge_distance(point1, point2):
-    return math.sqrt((point2.x - point1.x)**2 + (point2.y - point1.y)**2)
+    return sqrt((point2.x - point1.x)**2 + (point2.y - point1.y)**2)
 
+def angle(center, point):
+    dx = point.x - center.x
+    dy = point.y - center.y
+
+    if dx == 0:
+        if dy < 0:
+            return pi*3 / 2
+        else:
+            return pi / 2
+    if dy == 0:
+        if dx < 0:
+            return pi
+        else:
+            return 0
+
+    if dx < 0:
+        return pi + atan(dy/dx)
+    if dy < 0:
+        return 2*pi + atan(dy/dx)
+
+    return atan(dy/dx)
 
 #TODO: If two nodes have the same distance, will the algorithm break?
 def shortest_path(graph, ship, port):
@@ -151,7 +172,7 @@ def shortest_path(graph, ship, port):
         path.append(min_edge)
         point = min_edge.get_adjacent(point)
     return path
-    
+
 '''
     #Draw the obstacles and operating network
     fig = plt.figure(1, figsize=(5,5), dpi=90)
