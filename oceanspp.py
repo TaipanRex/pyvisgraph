@@ -126,29 +126,25 @@ def shortest_path(graph, ship, port):
 
     #Calculate distances
     point = None
-    ship_edges = []
     while point != ship:
-        # 1) Select the point with lowest distance
         point = min(not_visited, key=lambda p: distance[p])
         visited.append(point)
         not_visited.remove(point)
 
-        if distance[point] + edge_distance(point, ship) < distance[ship]:  # 2) cut off edges to the ship node where there is one that is better
-            # 3) TODO: Check visibility between vertex and ship
-            if point == Point(8.0, 6.0) or point == Point(10.0, 1.5):  # Temporary solution, manually add those that are visible to ship
-                graph.polygons[0].add_edge(Edge(point, ship)) # TODO: Ugly, add separate Edges.
-                ship_edges.append(Edge(ship, point))
-            # 4) Distance update
+        # Cut off edges to the ship when there is one that is better
+        if distance[point] + edge_distance(point, ship) < distance[ship]:
+            # TODO: Check visibility between vertex and ship
+            if point == Point(8.0, 6.0) or point == Point(10.0, 1.5):
+                graph.polygons[0].add_edge(Edge(point, ship)) # TODO: Ugly, add separate Edges?
+            # Distance update
             for edge in graph.get_point_edges(point):
                 point2 = edge.get_adjacent(point)
                 if distance[point2] > distance[point] + edge_distance(point, point2):
                     distance[point2] = distance[point] + edge_distance(point, point2)
 
-    #Find the shortest path
+    #Return the shortest path
     path = []
-    min_edge = min(ship_edges, key=lambda e: distance[e.get_adjacent(ship)] + edge_distance(*e.points))
-    path.append(min_edge)
-    point = min_edge.get_adjacent(ship)
+    point = ship
 
     while point != port:
         min_edge = min(graph.get_point_edges(point), key=lambda e: distance[edge.get_adjacent(point)])
