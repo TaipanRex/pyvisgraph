@@ -98,6 +98,9 @@ class TestEdgeIntersectFunction:
         self.point_c = Point(4.0, 2.0)
         self.point_d = Point(4.0, 5.0)
         self.point_e = Point(5.0, 4.0)
+        self.point_f = Point(3.0, 4.0)
+        self.point_g = Point(4.0, 1.0)
+        self.point_h = Point(6.0, 4.0)
         self.edge = Edge(self.point_a, self.point_b)
 
     def test_edge_intersect_1(self):
@@ -105,6 +108,15 @@ class TestEdgeIntersectFunction:
 
     def test_edge_intersect_2(self):
         assert edge_intersect(self.point_c, self.point_e, self.edge) == True
+
+    def test_edge_intersect_3(self):
+        assert edge_intersect(self.point_f, self.point_e, self.edge) == True
+
+    def test_edge_intersect_4(self):
+        assert edge_intersect(self.point_g, self.point_b, self.edge) == False
+
+    def test_edge_intersect_5(self):
+        assert edge_intersect(self.point_g, self.point_h, self.edge) == False
 
 class TestShortestPaths:
 

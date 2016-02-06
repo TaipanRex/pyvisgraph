@@ -157,7 +157,17 @@ def edge_intersect(point1, point2, edge):
         x2_left = edge_point2.x < point1.x
         return not (x1_left == x2_left)
 
-    return "a"
+    slope = (point1.y - point2.y) / (point1.x - point2.x)
+
+    y1_ex = slope * (edge_point1.x - point1.x) + point1.y
+    y2_ex = slope * (edge_point2.x - point1.x) + point1.y
+
+    if y1_ex == edge_point1.y or y2_ex == edge_point2.y:
+        return False
+
+    y1_below = (y1_ex > edge_point1.y)
+    y2_below = (y2_ex > edge_point2.y)
+    return not (y1_below == y2_below)
 
 #TODO: If two nodes have the same distance, will the algorithm break?
 def shortest_path(graph, ship, port):
