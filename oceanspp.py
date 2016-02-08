@@ -116,6 +116,35 @@ def edge_distance(point1, point2):
     return sqrt((point2.x - point1.x)**2
                 + (point2.y - point1.y)**2)
 
+def point_edge_distance(point1, point2, edge):
+    """
+    The line going from point1 to point2, interects edge before reaching
+    point2. Return the distance from point1 to this interect point.
+    """
+    edge_point1, edge_point2 = edge.points
+
+    if edge_point1.x == edge_point2.x:
+        if point1.x == point2.x:
+            return 0
+        points_slope = (point1.y - point2.y) / (point1.x - point2.x)
+        intersect_x = edge_point1.x
+        intersect_y = points_slope * (intersect_x - point1.x) + point1.y
+        return edge_distance(point1, Point(intersect_x, intersect_y))
+
+    if point1.x == point2.x:
+        edge_slope = (edge_point1.y - edge_point2.y) / (edge_point1.x - edge_point2.x)
+        intersect_x = point1.x
+        intersect_y = edge_slope * (intersect_x - edge_point1.x) + edge_point1.y
+        return edge_distance(point1, Point(intersect_x, intersect_y))
+
+    points_slope = (point1.y - point2.y) / (point1.x - point2.x)
+    edge_slope = (edge_point1.y - edge_point2.y) / (edge_point1.x - edge_point2.x)
+    if edge_slope == points_slope:
+        return 0
+    intersect_x = (edge_slope*edge_point1.x - points_slope*point1.x + point1.y - edge_point1.y) / (edge_slope - points_slope)
+    intersect_y = edge_slope * (intersect_x - edge_point1.x) + edge_point1.y
+    return edge_distance(point1, Point(intersect_x, intersect_y))
+
 def angle(center, point):
     """
     Return the angle of 'point' where 'center' is the center of
@@ -204,34 +233,3 @@ def shortest_path(graph, ship, port):
         path.append(min_edge)
         point = min_edge.get_adjacent(point)
     return path
-
-'''
-    #Draw the obstacles and operating network
-    fig = plt.figure(1, figsize=(5,5), dpi=90)
-    ax = fig.add_subplot(111)
-
-    #Draw the obstacles
-    for polygon in graph.polygons:
-        for edge in polygon.edges():
-            x,y = zip(*edge)
-            ax.plot(x, y, color='blue', alpha=0.7, linewidth=3, solid_capstyle='round', zorder=2)
-
-    #Draw the operating network
-    for edge in op_network.edges():
-        x,y = zip(*edge)
-        ax.plot(x, y, color='red', alpha=0.7, linewidth=1)
-
-    #draw shortest path
-    x,y = zip(*shortest)
-    ax.plot(x, y, color='green', alpha=0.7, linewidth=2)
-
-    ax.set_title("ocean shortest path test")
-    xrange = [0, 11]
-    yrange = [0, 9]
-    ax.set_xlim(*xrange)
-    ax.set_xticks(range(*xrange) + [xrange[-1]])
-    ax.set_ylim(*yrange)
-    ax.set_yticks(range(*yrange) + [yrange[-1]])
-    ax.set_aspect(1)
-    fig.savefig("poly.png")
-'''

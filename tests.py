@@ -1,5 +1,5 @@
 from oceanspp import Graph, Point, Edge, Polygon, shortest_path, angle
-from oceanspp import edge_intersect
+from oceanspp import edge_intersect, point_edge_distance
 import pytest
 from math import pi, degrees
 
@@ -117,6 +117,34 @@ class TestEdgeIntersectFunction:
 
     def test_edge_intersect_5(self):
         assert edge_intersect(self.point_g, self.point_h, self.edge) == False
+
+class TestPointEdgeDistanceFunction:
+
+    def setup_method(self, method):
+        self.point_a = Point(3.0, 1.0)
+        self.point_b = Point(3.0, 5.0)
+        self.point_c = Point(2.0, 2.0)
+        self.point_d = Point(4.0, 4.0)
+        self.point_e = Point(1.0, 1.0)
+        self.point_f = Point(1.0, 2.0)
+        self.point_g = Point(3.0, 4.0)
+        self.point_h = Point(2.0, 5.0)
+        self.point_i = Point(4.0, 4.0)
+        self.edge = Edge(self.point_a, self.point_b)
+        self.edge2 = Edge(self.point_c, self.point_d)
+        self.edge3 = Edge(self.point_e, self.point_b)
+
+    def test_point_edge_distance_1(self):
+        assert point_edge_distance(self.point_c, self.point_d, self.edge) == 1.4142135623730951
+
+    def test_point_edge_distance_2(self):
+        assert point_edge_distance(self.point_a, self.point_b, self.edge2) == 2.0
+
+    def test_point_edge_distance_3(self):
+        assert point_edge_distance(self.point_f, self.point_g, self.edge3) == 1.4142135623730951
+
+    def test_point_edge_distance_4(self):
+        assert point_edge_distance(self.point_h, self.point_g, self.edge3) ==  0.9428090415820635
 
 class TestShortestPaths:
 
@@ -236,3 +264,34 @@ class TestShortestPaths:
         edge_c = Edge(Point(5.0, 3.0), Point(4.0, 2.5))
         edge_d = Edge(Point(4.0, 2.5), Point(1.0, 2.0))
         assert shortest == [edge_a, edge_b, edge_c, edge_d]
+
+'''
+    #Draw the obstacles and operating network
+    fig = plt.figure(1, figsize=(5,5), dpi=90)
+    ax = fig.add_subplot(111)
+
+    #Draw the obstacles
+    for polygon in graph.polygons:
+        for edge in polygon.edges():
+            x,y = zip(*edge)
+            ax.plot(x, y, color='blue', alpha=0.7, linewidth=3, solid_capstyle='round', zorder=2)
+
+    #Draw the operating network
+    for edge in op_network.edges():
+        x,y = zip(*edge)
+        ax.plot(x, y, color='red', alpha=0.7, linewidth=1)
+
+    #draw shortest path
+    x,y = zip(*shortest)
+    ax.plot(x, y, color='green', alpha=0.7, linewidth=2)
+
+    ax.set_title("ocean shortest path test")
+    xrange = [0, 11]
+    yrange = [0, 9]
+    ax.set_xlim(*xrange)
+    ax.set_xticks(range(*xrange) + [xrange[-1]])
+    ax.set_ylim(*yrange)
+    ax.set_yticks(range(*yrange) + [yrange[-1]])
+    ax.set_aspect(1)
+    fig.savefig("poly.png")
+'''
