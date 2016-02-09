@@ -1,5 +1,4 @@
 from math import pi, sqrt, atan
-from matplotlib import pyplot as plt
 
 class Point:
 
@@ -109,6 +108,65 @@ class Graph:
             s += str(polygon)
         return s
 
+def visible_vertices(point, graph, ship, port):
+    points = graph.get_points()
+    edges = graph.get_edges()
+    points.append(ship)
+    points.remove(point)
+
+    # Sort points by angle from x-axis with point as center
+    points.sort(key = lambda p: angle(point, p))
+
+    open_edges = []
+    for edge in edges:
+        if edge_intersect(point, points[0], edge):
+            open_edges.append(edge)
+    open_edges.sort(key = lambda e: point_edge_distance(point, points[0], edge))
+
+    visible = []
+    for p in points:
+        for edge in graph.get_point_edges(p):
+                try:
+                    open_edges.remove(edge)
+                except ValueError:
+                    pass
+        print "POINT: " + str(p) + " " + str(len(open_edges))
+        for ee in open_edges:
+            print str(ee)
+        if len(open_edges) == 0 or edge_distance(point, p) <= point_edge_distance(point, p, open_edges[0]):
+            visible.append(p)
+        for edge in graph.get_point_edges(p):
+            if (not edge.contains(point)) and counterclockwise(point, edge, p):
+                open_edges.append(edge)
+        open_edges.sort(key = lambda e: point_edge_distance(point, p, e))
+
+    # remove edges that cross through polygons. Must be a better way...
+    for polygon in graph.polygons:
+        if point in polygon.points:
+            for p in polygon.points:
+                if not Edge(point, p) in polygon.edges:
+                    try:
+                        visible.remove(p)
+                    except ValueError:
+                        pass
+
+    return visible
+
+def counterclockwise(point, edge, endpoint):
+    s = ""
+    s += str(point) + " " + str(edge) + " " + str(endpoint)
+    edge_point1, edge_point2 = edge.points
+    if edge_point1 == endpoint:
+        angle_diff = angle(point, edge_point2) - angle(point, endpoint)
+    else:
+		angle_diff = angle(point, edge_point1) - angle(point, endpoint)
+
+    if angle_diff <= 0:
+        angle_diff += 2 * pi
+    s += " " + str(angle_diff < pi) + str(angle_diff)
+    print s
+    return angle_diff < pi
+
 def edge_distance(point1, point2):
     """
     Return the Euclidean distance between two Points.
@@ -118,7 +176,7 @@ def edge_distance(point1, point2):
 
 def point_edge_distance(point1, point2, edge):
     """
-    The line going from point1 to point2, interects edge before reaching
+    The line going from point1 to point2, intersects edge before reaching
     point2. Return the distance from point1 to this interect point.
     """
     edge_point1, edge_point2 = edge.points

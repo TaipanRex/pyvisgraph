@@ -1,7 +1,8 @@
 from oceanspp import Graph, Point, Edge, Polygon, shortest_path, angle
-from oceanspp import edge_intersect, point_edge_distance
+from oceanspp import edge_intersect, point_edge_distance, visible_vertices
 import pytest
 from math import pi, degrees
+from matplotlib import pyplot as plt
 
 '''
 setup_module(module): only run once when file is executed
@@ -255,6 +256,13 @@ class TestShortestPaths:
         self.graph = Graph([self.polygon_a, self.polygon_b])
         self.op_graph = Graph([self.op_network])
 
+    def test_visible_vertices(self):
+        ship = Point(10.0, 5.5)
+        port = Point(1.0, 2.0)
+        visible = visible_vertices(Point(4.5,5.0), self.graph, ship, port)
+        for p in visible:
+            print str(p) + ", "
+
     def test_shortest_path_1(self):
         ship = Point(10.0, 5.5)
         port = Point(1.0, 2.0)
@@ -263,35 +271,36 @@ class TestShortestPaths:
         edge_b = Edge(Point(8.0, 6.0), Point(5.0, 3.0))
         edge_c = Edge(Point(5.0, 3.0), Point(4.0, 2.5))
         edge_d = Edge(Point(4.0, 2.5), Point(1.0, 2.0))
+
+        #Draw the obstacles and operating network
+        fig = plt.figure(1, figsize=(5,5), dpi=90)
+        ax = fig.add_subplot(111)
+
+        #Draw the obstacles
+        for polygon in self.graph.polygons:
+            for edge in polygon.edges:
+                x = [edge.points[0].x, edge.points[1].x]
+                y = [edge.points[0].y, edge.points[1].y]
+                ax.plot(x, y, color='blue', alpha=0.7, linewidth=3, solid_capstyle='round', zorder=2)
+
+        #Draw the operating network
+        for edge in self.op_graph.get_edges():
+            x = [edge.points[0].x, edge.points[1].x]
+            y = [edge.points[0].y, edge.points[1].y]
+            ax.plot(x, y, color='red', alpha=0.7, linewidth=1)
+
+        #draw shortest path
+        #x,y = zip(*shortest)
+        #ax.plot(x, y, color='green', alpha=0.7, linewidth=2)
+
+        ax.set_title("ocean shortest path test")
+        xrange = [0, 11]
+        yrange = [0, 9]
+        ax.set_xlim(*xrange)
+        ax.set_xticks(range(*xrange) + [xrange[-1]])
+        ax.set_ylim(*yrange)
+        ax.set_yticks(range(*yrange) + [yrange[-1]])
+        ax.set_aspect(1)
+        fig.savefig("poly.png")
+
         assert shortest == [edge_a, edge_b, edge_c, edge_d]
-
-'''
-    #Draw the obstacles and operating network
-    fig = plt.figure(1, figsize=(5,5), dpi=90)
-    ax = fig.add_subplot(111)
-
-    #Draw the obstacles
-    for polygon in graph.polygons:
-        for edge in polygon.edges():
-            x,y = zip(*edge)
-            ax.plot(x, y, color='blue', alpha=0.7, linewidth=3, solid_capstyle='round', zorder=2)
-
-    #Draw the operating network
-    for edge in op_network.edges():
-        x,y = zip(*edge)
-        ax.plot(x, y, color='red', alpha=0.7, linewidth=1)
-
-    #draw shortest path
-    x,y = zip(*shortest)
-    ax.plot(x, y, color='green', alpha=0.7, linewidth=2)
-
-    ax.set_title("ocean shortest path test")
-    xrange = [0, 11]
-    yrange = [0, 9]
-    ax.set_xlim(*xrange)
-    ax.set_xticks(range(*xrange) + [xrange[-1]])
-    ax.set_ylim(*yrange)
-    ax.set_yticks(range(*yrange) + [yrange[-1]])
-    ax.set_aspect(1)
-    fig.savefig("poly.png")
-'''
