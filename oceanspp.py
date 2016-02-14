@@ -140,10 +140,18 @@ def visible_vertices(point, graph, ship, port):
             print("edge_distance:", edge_distance(point, p))
             print("edge_point_distance:", point_edge_distance(point, p, open_edges[0]))
         if len(open_edges) == 0 or edge_distance(point, p) <= point_edge_distance(point, p, open_edges[0]):
+            print("visible")
             if previous_point != None and angle(point, p) == angle(point, previous_point):
+                print("collinearity")
+                #if p.x == point.x:
+                    #if (p.y > point.y and previous_point.y > point.y) or (p.y < point.y and previous_point.y < point.y):
                 if edge_distance(point, p) < edge_distance(point, previous_point):
                     visible.append(p)
+                #elif (p.x > point.x and previous_point.x > point.x) or (p.x < point.x and previous_point.x < point.x):
+                #    if edge_distance(point, p) < edge_distance(point, previous_point):
+                #        visible.append(p)
             else:
+                print("last vis")
                 visible.append(p)
 
         edge_order = []

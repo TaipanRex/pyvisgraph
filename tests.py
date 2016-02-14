@@ -102,7 +102,7 @@ def test_point_edge_distance_function():
 
 class TestVisibleVertices:
 
-    def test_visible_vertices_of_1_convex_polygon(self):
+    def test_visible_vertices_1(self):
         point_a = Point(1.0, 1.0)
         point_b = Point(3.0, 1.0)
         point_c = Point(1.0, 3.0)
@@ -132,6 +132,36 @@ class TestVisibleVertices:
         #This also tests collinearity
         visible = visible_vertices(ship, graph, ship, None)
         assert visible == [point_c, point_d]
+
+    def test_visible_vertices_2(self):
+        point_a = Point(0.0, 1.0)
+        point_b = Point(1.0, 1.0)
+        point_c = Point(1.0, 2.0)
+
+        point_d = Point(5.0, 6.0)
+        point_e = Point(6.0, 6.0)
+        point_f = Point(6.0, 7.0)
+
+        edge_a = Edge(point_a, point_b)
+        edge_b = Edge(point_b, point_c)
+        edge_c = Edge(point_c, point_a)
+
+        edge_d = Edge(point_d, point_e)
+        edge_e = Edge(point_e, point_f)
+        edge_f = Edge(point_f, point_d)
+        polygon_a = Polygon([point_a, point_b, point_c],
+                                [edge_a, edge_b, edge_c])
+        polygon_b = Polygon([point_d, point_e, point_f],
+                                [edge_d, edge_e, edge_f])
+        graph = Graph([polygon_a, polygon_b])
+
+        ship = Point(4.0, 5.0)
+        #visible = visible_vertices(ship, graph, ship, None)
+        #assert visible == [point_f, point_e]
+        visible = visible_vertices(ship, graph, ship, None)
+        #assert visible == [point_f, point_e]
+        for v in visible:
+            print str(v) + ", "
 
 class TestShortestPaths:
 
