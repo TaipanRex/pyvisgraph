@@ -102,42 +102,36 @@ def test_point_edge_distance_function():
 
 class TestVisibleVertices:
 
-    def setup_method(self, method):
-        self.point_a = Point(1.0, 1.0)
-        self.point_b = Point(3.0, 1.0)
-        self.point_c = Point(1.0, 3.0)
-        self.point_d = Point(3.0, 4.0)
-        self.point_e = Point(4.0, 3.0)
-        self.edge_a = Edge(self.point_a, self.point_c)
-        self.edge_b = Edge(self.point_a, self.point_b)
-        self.edge_c = Edge(self.point_b, self.point_e)
-        self.edge_d = Edge(self.point_c, self.point_d)
-        self.edge_e = Edge(self.point_d, self.point_e)
-        self.polygon = Polygon([self.point_a, self.point_b, self.point_c,
-                                self.point_d, self.point_e],
-                                [self.edge_a, self.edge_b, self.edge_c,
-                                self.edge_d, self.edge_e])
-        self.graph = Graph([self.polygon])
-
     def test_visible_vertices_of_1_convex_polygon(self):
+        point_a = Point(1.0, 1.0)
+        point_b = Point(3.0, 1.0)
+        point_c = Point(1.0, 3.0)
+        point_d = Point(3.0, 4.0)
+        point_e = Point(4.0, 3.0)
+        edge_a = Edge(point_a, point_c)
+        edge_b = Edge(point_a, point_b)
+        edge_c = Edge(point_b, point_e)
+        edge_d = Edge(point_c, point_d)
+        edge_e = Edge(point_d, point_e)
+        polygon = Polygon([point_a, point_b, point_c, point_d, point_e],
+                                [edge_a, edge_b, edge_c, edge_d, edge_e])
+        graph = Graph([polygon])
+
         ship = Point(2.0, 5.0)
-        visible = visible_vertices(self.point_a, self.graph, ship, None)
-        assert visible == [self.point_b, self.point_c]
-        visible = visible_vertices(self.point_b, self.graph, ship, None)
-        assert visible == [self.point_e, self.point_a]
-        visible = visible_vertices(self.point_c, self.graph, ship, None)
-        assert visible == [self.point_d, ship, self.point_a]
-        visible = visible_vertices(self.point_d, self.graph, ship, None)
-        assert visible == [ship, self.point_c, self.point_e]
-        visible = visible_vertices(self.point_e, self.graph, ship, None)
-        assert visible == [self.point_d, self.point_b]
-        visible = visible_vertices(ship, self.graph, ship, None)
-
-        for p in visible:
-            print str(p) + ", "
-        #Why can the ship see e, but e cannot see the ship?
-        assert visible == [self.point_d, self.point_c]
-
+        visible = visible_vertices(point_a, graph, ship, None)
+        assert visible == [point_b, point_c]
+        visible = visible_vertices(point_b, graph, ship, None)
+        assert visible == [point_e, point_a]
+        visible = visible_vertices(point_c, graph, ship, None)
+        assert visible == [point_d, ship, point_a]
+        visible = visible_vertices(point_d, graph, ship, None)
+        assert visible == [ship, point_c, point_e]
+        #This also tests collinearity
+        visible = visible_vertices(point_e, graph, ship, None)
+        assert visible == [point_d, point_b]
+        #This also tests collinearity
+        visible = visible_vertices(ship, graph, ship, None)
+        assert visible == [point_c, point_d]
 
 class TestShortestPaths:
 

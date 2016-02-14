@@ -1,4 +1,5 @@
-from math import pi, sqrt, atan
+from __future__ import print_function
+from math import pi, sqrt, atan, acos
 
 class Point:
 
@@ -114,9 +115,9 @@ def visible_vertices(point, graph, ship, port):
     points.append(ship)
     points.remove(point)
 
-    # Sort points by angle from x-axis with point as center
-    # TODO: try (angle(), distance())
-    points.sort(key = lambda p: angle(point, p))
+    ''' Sort points by angle from x-axis with point as center. If angle is same,
+    sort by point closest to center. '''
+    points.sort(key = lambda p: (angle(point, p), edge_distance(point, p)))
 
     open_edges = []
     for edge in edges:
@@ -125,23 +126,38 @@ def visible_vertices(point, graph, ship, port):
     open_edges.sort(key = lambda e: point_edge_distance(point, points[0], edge))
 
     visible = []
+    previous_point = None
     for p in points:
+        print("\n", p, ":", sep="")
+        print("start open_edges:", *open_edges, sep=",")
         for edge in graph.get_point_edges(p):
                 try:
                     open_edges.remove(edge)
                 except ValueError:
                     pass
-        #print "POINT: " + str(p) + " " + str(len(open_edges))
-        #for ee in open_edges:
-        #    print str(ee)
+        print("middle open_edges:", *open_edges, sep=",")
+        if len(open_edges) > 0:
+            print("edge_distance:", edge_distance(point, p))
+            print("edge_point_distance:", point_edge_distance(point, p, open_edges[0]))
         if len(open_edges) == 0 or edge_distance(point, p) <= point_edge_distance(point, p, open_edges[0]):
-            visible.append(p)
+            if previous_point != None and angle(point, p) == angle(point, previous_point):
+                if edge_distance(point, p) < edge_distance(point, previous_point):
+                    visible.append(p)
+            else:
+                visible.append(p)
+
+        edge_order = []
         for edge in graph.get_point_edges(p):
             if (not edge.contains(point)) and counterclockwise(point, edge, p):
-                open_edges.append(edge)
+                edge_order.append((angle2(point, p, edge.get_adjacent(p)), edge))
+        edge_order.sort(key=lambda x: x[0])
+        for e in edge_order:
+            print(e[1], e[0])
+            open_edges.append(e[1])
         #TODO: try (point_edge_distance(), pi - angle())
-        open_edges.sort(key = lambda e: point_edge_distance(point, p, e))
-
+        #open_edges.sort(key = lambda e: (point_edge_distance(point, p, e), pi))
+        print("last open_edges:", *open_edges, sep=",")
+        previous_point = p
     # remove edges that cross through polygons. Must be a better way...
     for polygon in graph.polygons:
         if point in polygon.points:
@@ -153,6 +169,12 @@ def visible_vertices(point, graph, ship, port):
                         pass
 
     return visible
+
+def angle2(point_a, point_b, point_c):
+    a = edge_distance(point_b, point_c)
+    b = edge_distance(point_a, point_c)
+    c = edge_distance(point_a, point_b)
+    return acos((a**2 + c**2 - b**2) / (2*a*c))
 
 def counterclockwise(point, edge, endpoint):
     #s = ""
