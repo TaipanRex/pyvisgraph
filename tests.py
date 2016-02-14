@@ -28,24 +28,12 @@ class TestUndirectedGraph:
         self.edge_c = Edge(self.point_c, self.point_d)
         self.edge_d = Edge(self.point_d, self.point_c)
 
-    def test_point_equality_1(self):
-        point = Point(0.0, 1.0)
-        assert self.point_a == point
-
-    def test_point_equality_2(self):
-        point = Point(1.0, 0.0)
-        assert self.point_a != point
-
-    def test_edge_equality_1(self):
+    def test_point_equality(self):
+        assert self.point_a == Point(0.0, 1.0)
+        assert self.point_a != Point(1.0, 0.0)
         assert self.edge_a == self.edge_b
-
-    def test_edge_equality_2(self):
         assert self.edge_a == self.edge_a
-
-    def test_edge_equality_3(self):
         assert self.edge_a == self.edge_c
-
-    def test_edge_equality_4(self):
         assert self.edge_a == self.edge_d
 
     def test_polygon_duplicate_edges(self):
@@ -62,90 +50,94 @@ class TestUndirectedGraph:
         graph = Graph([polygon])
         assert str(graph) == "Polygon 0\nPoints: (0.0, 1.0), (1.0, 2.0)\nEdges: ((0.0, 1.0), (1.0, 2.0))"
 
+def test_angle_function():
+    center = Point(1.0, 1.0)
+    point_a = Point(3.0, 1.0)
+    point_b = Point(1.0, 0)
+    point_c = Point(0.0, 2.0)
+    point_d = Point(2.0, 2.0)
+    point_e = Point(2.0, 0.0)
+    point_f = Point(0.0, 0.0)
+    assert angle(center, point_a) == 0
+    assert angle(center, point_b) == pi*3 / 2
+    assert degrees(angle(center, point_c)) == 135
+    assert degrees(angle(center, point_d)) == 45
+    assert degrees(angle(center, point_e)) == 315
+    assert degrees(angle(center, point_f)) == 225
 
-class TestAngleFunction:
-    def setup_method(self, method):
-        self.center = Point(1.0, 1.0)
-        self.point_a = Point(3.0, 1.0)
-        self.point_b = Point(1.0, 0)
-        self.point_c = Point(0.0, 2.0)
-        self.point_d = Point(2.0, 2.0)
-        self.point_e = Point(2.0, 0.0)
-        self.point_f = Point(0.0, 0.0)
+def test_edge_intersect_function():
+    point_a = Point(3.0, 5.0)
+    point_b = Point(5.0, 3.0)
+    point_c = Point(4.0, 2.0)
+    point_d = Point(4.0, 5.0)
+    point_e = Point(5.0, 4.0)
+    point_f = Point(3.0, 4.0)
+    point_g = Point(4.0, 1.0)
+    point_h = Point(6.0, 4.0)
+    edge = Edge(point_a, point_b)
+    assert edge_intersect(point_c, point_d, edge) == True
+    assert edge_intersect(point_c, point_e, edge) == True
+    assert edge_intersect(point_f, point_e, edge) == True
+    assert edge_intersect(point_g, point_b, edge) == False
+    assert edge_intersect(point_g, point_h, edge) == False
 
-    def test_angle_1(self):
-        assert angle(self.center, self.point_a) == 0
+def test_point_edge_distance_function():
+    point_a = Point(3.0, 1.0)
+    point_b = Point(3.0, 5.0)
+    point_c = Point(2.0, 2.0)
+    point_d = Point(4.0, 4.0)
+    point_e = Point(1.0, 1.0)
+    point_f = Point(1.0, 2.0)
+    point_g = Point(3.0, 4.0)
+    point_h = Point(2.0, 5.0)
+    point_i = Point(4.0, 4.0)
+    edge = Edge(point_a, point_b)
+    edge2 = Edge(point_c, point_d)
+    edge3 = Edge(point_e, point_b)
+    assert point_edge_distance(point_c, point_d, edge) == 1.4142135623730951
+    assert point_edge_distance(point_a, point_b, edge2) == 2.0
+    assert point_edge_distance(point_f, point_g, edge3) == 1.4142135623730951
+    assert point_edge_distance(point_h, point_g, edge3) ==  0.9428090415820635
 
-    def test_angle_2(self):
-        assert angle(self.center, self.point_b) == pi*3 / 2
 
-    def test_angle_3(self):
-        assert degrees(angle(self.center, self.point_c)) == 135
-
-    def test_angle_4(self):
-        assert degrees(angle(self.center, self.point_d)) == 45
-
-    def test_angle_4(self):
-        assert degrees(angle(self.center, self.point_e)) == 315
-
-    def test_angle_5(self):
-        assert degrees(angle(self.center, self.point_f)) == 225
-
-class TestEdgeIntersectFunction:
-
-    def setup_method(self, method):
-        self.point_a = Point(3.0, 5.0)
-        self.point_b = Point(5.0, 3.0)
-        self.point_c = Point(4.0, 2.0)
-        self.point_d = Point(4.0, 5.0)
-        self.point_e = Point(5.0, 4.0)
-        self.point_f = Point(3.0, 4.0)
-        self.point_g = Point(4.0, 1.0)
-        self.point_h = Point(6.0, 4.0)
-        self.edge = Edge(self.point_a, self.point_b)
-
-    def test_edge_intersect_1(self):
-        assert edge_intersect(self.point_c, self.point_d, self.edge) == True
-
-    def test_edge_intersect_2(self):
-        assert edge_intersect(self.point_c, self.point_e, self.edge) == True
-
-    def test_edge_intersect_3(self):
-        assert edge_intersect(self.point_f, self.point_e, self.edge) == True
-
-    def test_edge_intersect_4(self):
-        assert edge_intersect(self.point_g, self.point_b, self.edge) == False
-
-    def test_edge_intersect_5(self):
-        assert edge_intersect(self.point_g, self.point_h, self.edge) == False
-
-class TestPointEdgeDistanceFunction:
+class TestVisibleVertices:
 
     def setup_method(self, method):
-        self.point_a = Point(3.0, 1.0)
-        self.point_b = Point(3.0, 5.0)
-        self.point_c = Point(2.0, 2.0)
-        self.point_d = Point(4.0, 4.0)
-        self.point_e = Point(1.0, 1.0)
-        self.point_f = Point(1.0, 2.0)
-        self.point_g = Point(3.0, 4.0)
-        self.point_h = Point(2.0, 5.0)
-        self.point_i = Point(4.0, 4.0)
-        self.edge = Edge(self.point_a, self.point_b)
-        self.edge2 = Edge(self.point_c, self.point_d)
-        self.edge3 = Edge(self.point_e, self.point_b)
+        self.point_a = Point(1.0, 1.0)
+        self.point_b = Point(3.0, 1.0)
+        self.point_c = Point(1.0, 3.0)
+        self.point_d = Point(3.0, 4.0)
+        self.point_e = Point(4.0, 3.0)
+        self.edge_a = Edge(self.point_a, self.point_c)
+        self.edge_b = Edge(self.point_a, self.point_b)
+        self.edge_c = Edge(self.point_b, self.point_e)
+        self.edge_d = Edge(self.point_c, self.point_d)
+        self.edge_e = Edge(self.point_d, self.point_e)
+        self.polygon = Polygon([self.point_a, self.point_b, self.point_c,
+                                self.point_d, self.point_e],
+                                [self.edge_a, self.edge_b, self.edge_c,
+                                self.edge_d, self.edge_e])
+        self.graph = Graph([self.polygon])
 
-    def test_point_edge_distance_1(self):
-        assert point_edge_distance(self.point_c, self.point_d, self.edge) == 1.4142135623730951
+    def test_visible_vertices_of_1_convex_polygon(self):
+        ship = Point(2.0, 5.0)
+        visible = visible_vertices(self.point_a, self.graph, ship, None)
+        assert visible == [self.point_b, self.point_c]
+        visible = visible_vertices(self.point_b, self.graph, ship, None)
+        assert visible == [self.point_e, self.point_a]
+        visible = visible_vertices(self.point_c, self.graph, ship, None)
+        assert visible == [self.point_d, ship, self.point_a]
+        visible = visible_vertices(self.point_d, self.graph, ship, None)
+        assert visible == [ship, self.point_c, self.point_e]
+        visible = visible_vertices(self.point_e, self.graph, ship, None)
+        assert visible == [self.point_d, self.point_b]
+        visible = visible_vertices(ship, self.graph, ship, None)
 
-    def test_point_edge_distance_2(self):
-        assert point_edge_distance(self.point_a, self.point_b, self.edge2) == 2.0
+        for p in visible:
+            print str(p) + ", "
+        #Why can the ship see e, but e cannot see the ship?
+        assert visible == [self.point_d, self.point_c]
 
-    def test_point_edge_distance_3(self):
-        assert point_edge_distance(self.point_f, self.point_g, self.edge3) == 1.4142135623730951
-
-    def test_point_edge_distance_4(self):
-        assert point_edge_distance(self.point_h, self.point_g, self.edge3) ==  0.9428090415820635
 
 class TestShortestPaths:
 
@@ -255,13 +247,6 @@ class TestShortestPaths:
         self.op_network = Polygon(self.points, self.edges)
         self.graph = Graph([self.polygon_a, self.polygon_b])
         self.op_graph = Graph([self.op_network])
-
-    def test_visible_vertices(self):
-        ship = Point(10.0, 5.5)
-        port = Point(1.0, 2.0)
-        visible = visible_vertices(Point(4.5,5.0), self.graph, ship, port)
-        for p in visible:
-            print str(p) + ", "
 
     def test_shortest_path_1(self):
         ship = Point(10.0, 5.5)
