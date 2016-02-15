@@ -128,30 +128,16 @@ def visible_vertices(point, graph, ship, port):
     visible = []
     previous_point = None
     for p in points:
-        print("\n", p, ":", sep="")
-        print("start open_edges:", *open_edges, sep=",")
         for edge in graph.get_point_edges(p):
                 try:
                     open_edges.remove(edge)
                 except ValueError:
                     pass
-        print("middle open_edges:", *open_edges, sep=",")
-        if len(open_edges) > 0:
-            print("edge_distance:", edge_distance(point, p))
-            print("edge_point_distance:", point_edge_distance(point, p, open_edges[0]))
         if len(open_edges) == 0 or edge_distance(point, p) <= point_edge_distance(point, p, open_edges[0]):
-            print("visible")
             if previous_point != None and angle(point, p) == angle(point, previous_point):
-                print("collinearity")
-                #if p.x == point.x:
-                    #if (p.y > point.y and previous_point.y > point.y) or (p.y < point.y and previous_point.y < point.y):
                 if edge_distance(point, p) < edge_distance(point, previous_point):
                     visible.append(p)
-                #elif (p.x > point.x and previous_point.x > point.x) or (p.x < point.x and previous_point.x < point.x):
-                #    if edge_distance(point, p) < edge_distance(point, previous_point):
-                #        visible.append(p)
             else:
-                print("last vis")
                 visible.append(p)
 
         edge_order = []
@@ -160,12 +146,9 @@ def visible_vertices(point, graph, ship, port):
                 edge_order.append((angle2(point, p, edge.get_adjacent(p)), edge))
         edge_order.sort(key=lambda x: x[0])
         for e in edge_order:
-            print(e[1], e[0])
             open_edges.append(e[1])
-        #TODO: try (point_edge_distance(), pi - angle())
-        #open_edges.sort(key = lambda e: (point_edge_distance(point, p, e), pi))
-        print("last open_edges:", *open_edges, sep=",")
         previous_point = p
+
     # remove edges that cross through polygons. Must be a better way...
     for polygon in graph.polygons:
         if point in polygon.points:
@@ -185,8 +168,6 @@ def angle2(point_a, point_b, point_c):
     return acos((a**2 + c**2 - b**2) / (2*a*c))
 
 def counterclockwise(point, edge, endpoint):
-    #s = ""
-    #s += str(point) + " " + str(edge) + " " + str(endpoint)
     edge_point1, edge_point2 = edge.points
     if edge_point1 == endpoint:
         angle_diff = angle(point, edge_point2) - angle(point, endpoint)
@@ -195,8 +176,6 @@ def counterclockwise(point, edge, endpoint):
 
     if angle_diff <= 0:
         angle_diff += 2 * pi
-    #s += " " + str(angle_diff < pi) + str(angle_diff)
-    #print s
     return angle_diff < pi
 
 def edge_distance(point1, point2):

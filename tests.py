@@ -13,7 +13,11 @@ In a class:
 setup(self): gets run last when a method is called
 setup_class(cls):
 setup_method(self, method):
-
+def test_subscribe_when_already_registered():
+    # GIVEN a user is already subscribed to a newsletter
+    # WHEN a user subscribes to the newsletter
+    # THEN no changes are made to the email list
+    # and the user is told they already are subscribed
 '''
 
 class TestUndirectedGraph:
@@ -149,19 +153,48 @@ class TestVisibleVertices:
         edge_d = Edge(point_d, point_e)
         edge_e = Edge(point_e, point_f)
         edge_f = Edge(point_f, point_d)
-        polygon_a = Polygon([point_a, point_b, point_c],
-                                [edge_a, edge_b, edge_c])
-        polygon_b = Polygon([point_d, point_e, point_f],
-                                [edge_d, edge_e, edge_f])
+        polygon_a = Polygon([point_a, point_b, point_c], [edge_a, edge_b, edge_c])
+        polygon_b = Polygon([point_d, point_e, point_f], [edge_d, edge_e, edge_f])
         graph = Graph([polygon_a, polygon_b])
 
         ship = Point(4.0, 5.0)
-        #visible = visible_vertices(ship, graph, ship, None)
-        #assert visible == [point_f, point_e]
+        visible = visible_vertices(point_d, graph, ship, None)
+        assert visible == [point_e, point_f, ship, point_b]
         visible = visible_vertices(ship, graph, ship, None)
-        #assert visible == [point_f, point_e]
-        for v in visible:
-            print str(v) + ", "
+        assert visible == [point_e, point_d, point_c, point_b]
+        ship = Point(7.0, 8.0)
+        visible = visible_vertices(ship, graph, ship, None)
+        assert visible == [point_f, point_e]
+        ship = Point(6.0, 5.0)
+        visible = visible_vertices(ship, graph, ship, None)
+        assert visible == [point_e, point_d, point_c, point_b]
+
+    def test_visible_vertices_3(self):
+        point_a = Point(0.0, 1.0)
+        point_b = Point(2.0, 1.0)
+        point_c = Point(1.0, 2.0)
+
+        point_d = Point(3.0, 1.0)
+        point_e = Point(5.0, 1.0)
+        point_f = Point(4.0, 2.0)
+
+        edge_a = Edge(point_a, point_b)
+        edge_b = Edge(point_b, point_c)
+        edge_c = Edge(point_c, point_a)
+
+        edge_d = Edge(point_d, point_e)
+        edge_e = Edge(point_e, point_f)
+        edge_f = Edge(point_f, point_d)
+        polygon_a = Polygon([point_a, point_b, point_c], [edge_a, edge_b, edge_c])
+        polygon_b = Polygon([point_d, point_e, point_f], [edge_d, edge_e, edge_f])
+        graph = Graph([polygon_a, polygon_b])
+
+        ship = Point(6.0, 1.0)
+        visible = visible_vertices(ship, graph, ship, None)
+        assert visible == [point_f, point_e]
+        ship = Point(2.5, 3.5)
+        visible = visible_vertices(ship, graph, ship, None)
+        assert visible == [point_c, point_b, point_d, point_f]
 
 class TestShortestPaths:
 

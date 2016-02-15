@@ -1,6 +1,7 @@
 __pycache__
 *.pyc
 *.pdf
-*.png
+*.pptx
+poly.png
 .cache
 .idea
