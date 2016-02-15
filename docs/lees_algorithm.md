@@ -49,4 +49,38 @@ The key concept to understand in Lee's algorithm is the scan line. This took me
 actually implementing a working solution to fully understand. Hopefully I can
 explain it in a way that will save you some headaches.
 
-![Figure 1](lee_figure1.png)
+![Figure 1](images/lee_figure1.png)
+
+Let's say we are checking which points are visible from `point s`. To do this
+we need to visit each of the points `a` through `f`. The way we are going to visit
+the points is in a counter clockwise circle. We are going to use Lee's scan line
+for this, which is a half-line. Conceptually the scan line has its origin at
+`point s`, pointing to the right (parallel to the x-axis) and moves counter clock
+wise until it hits a point to check for visibility. _In reality we don't
+actually need to move in this way, we can just order the points according to
+their angle to `point s` and the x-axis (more on that later)._  
+
+Together with the scan line we are going to keep a ordered list of edges that
+we will need to use when we visit each point. This list will be used to check
+for point visibility.
+
+Once the scan line hits a point, the algorithm is going to work some magic on
+the edges incident on the point. Take figure 1: the first point the scan line
+will hit is `point a`, which has two edges (`edge ab` and `edge ac`). what
+it is going to do is check if each edge is on the "counter clock wise" side of
+the scan line. I.e., when the scan line continues moving, will it intersect any
+of those edges? In the case of `point a`, both edges are on the CCW side and will
+be added the edge list I mentioned we are tracking.
+
+Lets continue the scan line to `point b` (figure 2). Now, `edge ab` is
+on the clock wise side of the scan line and *it will never be intersected by the
+scan line again*. This means we are free to completely ignore that edge for all
+unvisited points and we can remove it from the tracking edge list. `edge ac` is
+still partially on the CCW side, so it stays in the list.
+
+What the scan line allows us to do is ignore edges that are no longer an issue;
+edges that can no longer block visibility of the next points to visit.
+When the scan line moves on to point c, d, e and f, it will never have to
+consider the edges that it has already passed, like `edge ab`.
+
+## Edge list

@@ -323,7 +323,7 @@ class TestShortestPaths:
             for edge in polygon.edges:
                 x = [edge.points[0].x, edge.points[1].x]
                 y = [edge.points[0].y, edge.points[1].y]
-                ax.plot(x, y, color='blue', alpha=0.7, linewidth=3, solid_capstyle='round', zorder=2)
+                ax.plot(x, y, color='gray', alpha=0.7, linewidth=5, solid_capstyle='round', zorder=2)
 
         #Draw the operating network
         for edge in self.op_graph.get_edges():
@@ -332,10 +332,12 @@ class TestShortestPaths:
             ax.plot(x, y, color='red', alpha=0.7, linewidth=1)
 
         #draw shortest path
-        #x,y = zip(*shortest)
-        #ax.plot(x, y, color='green', alpha=0.7, linewidth=2)
+        for edge in shortest:
+            x = [edge.points[0].x, edge.points[1].x]
+            y = [edge.points[0].y, edge.points[1].y]
+            ax.plot(x, y, color='green', alpha=0.7, linewidth=2)
 
-        ax.set_title("ocean shortest path test")
+        ax.set_title("Python visibility graph and shortest path")
         xrange = [0, 11]
         yrange = [0, 9]
         ax.set_xlim(*xrange)
