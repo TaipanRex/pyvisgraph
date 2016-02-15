@@ -345,6 +345,6 @@ class TestShortestPaths:
         ax.set_ylim(*yrange)
         ax.set_yticks(range(*yrange) + [yrange[-1]])
         ax.set_aspect(1)
-        fig.savefig("poly.png")
+        fig.savefig("poly.png", bbox_inches='tight')
 
         assert shortest == [edge_a, edge_b, edge_c, edge_d]
