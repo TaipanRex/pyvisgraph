@@ -49,7 +49,7 @@ The key concept to understand in Lee's algorithm is the scan line. This took me
 actually implementing a working solution to fully understand. Hopefully I can
 explain it in a way that will save you some headaches.
 
-![Figure 1](images/lee_figure1.png)
+![Figure 1](images/lee_figure1.PNG)
 
 Let's say we are checking which points are visible from `point s`. To do this
 we need to visit each of the points `a` through `f`. The way we are going to visit

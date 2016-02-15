@@ -1,5 +1,5 @@
 # Python Visibility Graph
-![Figure 1](docs/images/poly.png)
+![Figure 1](docs/images/graph.png)
 
 Given a set of simple obstacle polygons, this solution will return the
 visibility graph. It can also find the shortest path between two points using
