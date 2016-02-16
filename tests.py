@@ -1,5 +1,6 @@
-from oceanspp import Graph, Point, Edge, Polygon, shortest_path, angle
-from oceanspp import edge_intersect, point_edge_distance, visible_vertices
+from graph import Graph, Point, Edge, Polygon
+from visible_vertices import edge_intersect, point_edge_distance, visible_vertices, angle
+from shortest_path import shortest_path
 import pytest
 from math import pi, degrees
 from matplotlib import pyplot as plt
@@ -19,6 +20,7 @@ def test_subscribe_when_already_registered():
     # THEN no changes are made to the email list
     # and the user is told they already are subscribed
 '''
+
 
 class TestUndirectedGraph:
 
@@ -42,7 +44,7 @@ class TestUndirectedGraph:
 
     def test_polygon_duplicate_edges(self):
         polygon = Polygon([self.point_a, self.point_b],
-            [self.edge_a, self.edge_b])
+                          [self.edge_a, self.edge_b])
         assert len(polygon.edges) == 1
 
     def test_polygon_duplicate_points(self):

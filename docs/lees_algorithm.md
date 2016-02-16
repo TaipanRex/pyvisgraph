@@ -1,4 +1,4 @@
-#Lee's Algorithm
+# Lee's Algorithm
 There seems to be no easy to follow explanation of visibility graph algorithms
 on the internet. I have searched far and low and while the sources I did find
 are detailed and thorough, they were meant for smarter people than me. I will
@@ -26,11 +26,13 @@ though I leave those for another time.
 Before we start looking at Lee's algorithm, lets quickly understand the naive
 solution:
 
-    for each point p in graph G                                             #O(n)
-        for each point p2 in graph {G - p}                                  #O(n)
-            for each edge e in Graph G                                      #O(e)
-                if the arc from p to p2 does not intersect edge e then
-                    point p and p2 are mutually visible to each other
+```
+for each point p in graph G                                             #O(n)
+    for each point p2 in graph {G - p}                                  #O(n)
+        for each edge e in Graph G                                      #O(e)
+            if the arc from p to p2 does not intersect edge e then
+                point p and p2 are mutually visible to each other
+```
 
 For each point in the graph we need to check if every other point is visible
 to it. To do that we need to check each pair of points to all the edges, if they

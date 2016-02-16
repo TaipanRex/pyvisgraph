@@ -1,4 +1,8 @@
 # Python Visibility Graph
+
+[![MIT License](https://img.shields.io/badge/license-MIT-007EC7.svg?style=flat)](/LICENSE.txt)
+![PyPI](https://img.shields.io/badge/pypi-not%20released-lightgrey.svg?style=flat)
+
 ![Figure 1](docs/images/graph.png)
 
 Given a set of simple obstacle polygons, this solution will return the

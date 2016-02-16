@@ -1,113 +1,7 @@
 from __future__ import print_function
 from math import pi, sqrt, atan, acos
+from graph import Point, Edge, Polygon, Graph, edge_distance
 
-class Point:
-
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __eq__(self, point):
-        if point == None:
-            return False
-        return self.x == point.x and self.y == point.y
-
-    def __ne__(self, point):
-        return not self.__eq__(point)
-
-    def __str__(self):
-        return "(" + str(self.x) + ", " + str(self.y) + ")"
-
-    def __hash__(self):
-        # TODO: Will this mess something up with Edge comparison? if one point is x, y and other y, x?
-        return self.x.__hash__() + self.y.__hash__()
-
-class Edge:
-
-    def __init__(self, point1, point2):
-        self.points = (point1, point2)
-
-    def contains(self, point):
-        return point in self.points
-
-    def get_adjacent(self, point):
-        point_a, point_b = self.points
-        if point == point_a:
-            return point_b
-        return point_a
-
-    def __eq__(self, edge):
-        return set(self.points) == set(edge.points)
-
-    def __ne__(self, edge):
-        return not self.__eq__(edge)
-
-    def __str__(self):
-        return "(" + ", ".join(str(p) for p in self.points) + ")"
-
-    def __hash__(self):
-        hash_val = 0
-        for point in self.points:
-            hash_val += point.__hash__()
-        return hash_val
-
-class Polygon:
-
-    def __init__(self, points, edges):
-        self.points = []
-        self.edges = []
-        for point in points:
-            if point not in self.points:
-                self.points.append(point)
-        for edge in edges:
-            if edge not in self.edges:
-                self.edges.append(edge)
-
-    def add_point(self, point):
-        if point not in self.points:
-            self.points.append(point)
-
-    def add_edge(self, edge):
-        if edge not in self.edges:
-            self.edges.append(edge)
-
-    def __str__(self):
-        res = "Points: " + ', '.join(str(p) for p in self.points)
-        res += "\nEdges: " + ', '.join(str(e) for e in self.edges)
-        return res
-
-class Graph:
-
-    # TODO: polygons is a list of polygons, what if only one polygon is added i.e not a list?
-    def __init__(self, polygons):
-        self.polygons = polygons
-
-    def get_points(self):
-        points = []
-        for polygon in self.polygons:
-            points += polygon.points
-        return points
-
-    def get_edges(self):
-        edges = []
-        for polygon in self.polygons:
-            edges += polygon.edges
-        return edges
-
-    def get_point_edges(self, point):
-        edges = []
-        for polygon in self.polygons:
-            for edge in polygon.edges:
-                if edge.contains(point):
-                    edges.append(edge)
-        return edges
-
-    def __str__(self):
-        s = ""
-        for i, polygon in enumerate(self.polygons):
-            s += "Polygon %d\n" % i
-            s += str(polygon)
-        return s
 
 def visible_vertices(point, graph, ship, port):
     points = graph.get_points()
@@ -117,13 +11,13 @@ def visible_vertices(point, graph, ship, port):
 
     ''' Sort points by angle from x-axis with point as center. If angle is same,
     sort by point closest to center. '''
-    points.sort(key = lambda p: (angle(point, p), edge_distance(point, p)))
+    points.sort(key=lambda p: (angle(point, p), edge_distance(point, p)))
 
     open_edges = []
     for edge in edges:
         if edge_intersect(point, points[0], edge):
             open_edges.append(edge)
-    open_edges.sort(key = lambda e: point_edge_distance(point, points[0], edge))
+    open_edges.sort(key=lambda e: point_edge_distance(point, points[0], edge))
 
     visible = []
     previous_point = None
@@ -134,7 +28,7 @@ def visible_vertices(point, graph, ship, port):
                 except ValueError:
                     pass
         if len(open_edges) == 0 or edge_distance(point, p) <= point_edge_distance(point, p, open_edges[0]):
-            if previous_point != None and angle(point, p) == angle(point, previous_point):
+            if previous_point is not None and angle(point, p) == angle(point, previous_point):
                 if edge_distance(point, p) < edge_distance(point, previous_point):
                     visible.append(p)
             else:
@@ -161,29 +55,25 @@ def visible_vertices(point, graph, ship, port):
 
     return visible
 
+
 def angle2(point_a, point_b, point_c):
     a = edge_distance(point_b, point_c)
     b = edge_distance(point_a, point_c)
     c = edge_distance(point_a, point_b)
     return acos((a**2 + c**2 - b**2) / (2*a*c))
 
+
 def counterclockwise(point, edge, endpoint):
     edge_point1, edge_point2 = edge.points
     if edge_point1 == endpoint:
         angle_diff = angle(point, edge_point2) - angle(point, endpoint)
     else:
-		angle_diff = angle(point, edge_point1) - angle(point, endpoint)
+        angle_diff = angle(point, edge_point1) - angle(point, endpoint)
 
     if angle_diff <= 0:
         angle_diff += 2 * pi
     return angle_diff < pi
 
-def edge_distance(point1, point2):
-    """
-    Return the Euclidean distance between two Points.
-    """
-    return sqrt((point2.x - point1.x)**2
-                + (point2.y - point1.y)**2)
 
 def point_edge_distance(point1, point2, edge):
     """
@@ -214,6 +104,7 @@ def point_edge_distance(point1, point2, edge):
     intersect_y = edge_slope * (intersect_x - edge_point1.x) + edge_point1.y
     return edge_distance(point1, Point(intersect_x, intersect_y))
 
+
 def angle(center, point):
     """
     Return the angle of 'point' where 'center' is the center of
@@ -239,6 +130,7 @@ def angle(center, point):
         return 2*pi + atan(dy/dx)
 
     return atan(dy/dx)
+
 
 def edge_intersect(point1, point2, edge):
     """
@@ -266,39 +158,3 @@ def edge_intersect(point1, point2, edge):
     y1_below = (y1_ex > edge_point1.y)
     y2_below = (y2_ex > edge_point2.y)
     return not (y1_below == y2_below)
-
-#TODO: If two nodes have the same distance, will the algorithm break?
-def shortest_path(graph, ship, port):
-    visited = []
-    not_visited = graph.get_points()
-    not_visited.append(ship)
-    distance = {point: float('inf') for point in not_visited}
-    distance[port] = 0
-
-    #Calculate distances
-    point = None
-    while point != ship:
-        point = min(not_visited, key=lambda p: distance[p])
-        visited.append(point)
-        not_visited.remove(point)
-
-        # Cut off edges to the ship when there is one that is better
-        if distance[point] + edge_distance(point, ship) < distance[ship]:
-            # TODO: Check visibility between vertex and ship
-            if point == Point(8.0, 6.0) or point == Point(10.0, 1.5):
-                graph.polygons[0].add_edge(Edge(point, ship)) # TODO: Ugly, add separate Edges?
-            # Distance update
-            for edge in graph.get_point_edges(point):
-                point2 = edge.get_adjacent(point)
-                if distance[point2] > distance[point] + edge_distance(point, point2):
-                    distance[point2] = distance[point] + edge_distance(point, point2)
-
-    #Return the shortest path
-    path = []
-    point = ship
-
-    while point != port:
-        min_edge = min(graph.get_point_edges(point), key=lambda e: distance[edge.get_adjacent(point)])
-        path.append(min_edge)
-        point = min_edge.get_adjacent(point)
-    return path
