@@ -13,6 +13,8 @@ def visible_vertices(point, graph, ship, port):
     sort by point closest to center. '''
     points.sort(key=lambda p: (angle(point, p), edge_distance(point, p)))
 
+    ''' Initialize open_edges list with any intersecting edges from point to
+    the first point in angle sorted point list.'''
     open_edges = []
     for edge in edges:
         if edge_intersect(point, points[0], edge):
@@ -21,12 +23,14 @@ def visible_vertices(point, graph, ship, port):
 
     visible = []
     previous_point = None
+    ''' Visit all points in graph to check visibility from point. '''
     for p in points:
         for edge in graph.get_point_edges(p):
                 try:
                     open_edges.remove(edge)
                 except ValueError:
                     pass
+
         if len(open_edges) == 0 or edge_distance(point, p) <= point_edge_distance(point, p, open_edges[0]):
             if previous_point is not None and angle(point, p) == angle(point, previous_point):
                 if edge_distance(point, p) < edge_distance(point, previous_point):
