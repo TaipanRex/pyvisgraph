@@ -1,4 +1,4 @@
-from graph import Graph, Point, Edge, Polygon
+from graph import Graph, Point, Edge
 from visible_vertices import (edge_intersect, point_edge_distance,
                               visible_vertices, angle)
 from shortest_path import shortest_path
@@ -43,20 +43,10 @@ class TestUndirectedGraph:
         assert self.edge_a == self.edge_c
         assert self.edge_a == self.edge_d
 
-    def test_polygon_duplicate_edges(self):
-        polygon = Polygon([self.point_a, self.point_b],
-                          [self.edge_a, self.edge_b])
-        assert len(polygon.edges) == 1
-
-    def test_polygon_duplicate_points(self):
-        polygon = Polygon([self.point_a, self.point_b, self.point_a], [])
-        assert len(polygon.points) == 2
-
     def test_print_graph(self):
-        polygon = Polygon([self.point_a, self.point_b], [self.edge_a])
-        graph = Graph([polygon])
-        result = "Polygon 0\nPoints: (0.0, 1.0), (1.0, 2.0)\n"
-        result += "Edges: ((0.0, 1.0), (1.0, 2.0))"
+        graph = Graph([[self.point_a, self.point_b]])
+        result = "\n(0.0, 1.0): ((0.0, 1.0), (1.0, 2.0))"
+        result += "\n(1.0, 2.0): ((0.0, 1.0), (1.0, 2.0))"
         assert str(graph) == result
 
 
@@ -117,33 +107,26 @@ class TestVisibleVertices:
     def test_visible_vertices_1(self):
         point_a = Point(1.0, 1.0)
         point_b = Point(3.0, 1.0)
-        point_c = Point(1.0, 3.0)
+        point_c = Point(4.0, 3.0)
         point_d = Point(3.0, 4.0)
-        point_e = Point(4.0, 3.0)
-        edge_a = Edge(point_a, point_c)
-        edge_b = Edge(point_a, point_b)
-        edge_c = Edge(point_b, point_e)
-        edge_d = Edge(point_c, point_d)
-        edge_e = Edge(point_d, point_e)
-        polygon = Polygon([point_a, point_b, point_c, point_d, point_e],
-                          [edge_a, edge_b, edge_c, edge_d, edge_e])
-        graph = Graph([polygon])
-
+        point_e = Point(1.0, 3.0)
         ship = Point(2.0, 5.0)
+        graph = Graph([[point_a, point_b, point_c, point_d, point_e]])
+
         visible = visible_vertices(point_a, graph, ship, None)
-        assert visible == [point_b, point_c]
+        assert visible == [point_b, point_e]
         visible = visible_vertices(point_b, graph, ship, None)
-        assert visible == [point_e, point_a]
-        visible = visible_vertices(point_c, graph, ship, None)
+        assert visible == [point_c, point_a]
+        visible = visible_vertices(point_e, graph, ship, None)
         assert visible == [point_d, ship, point_a]
         visible = visible_vertices(point_d, graph, ship, None)
-        assert visible == [ship, point_c, point_e]
+        assert visible == [ship, point_e, point_c]
         # This also tests collinearity
-        visible = visible_vertices(point_e, graph, ship, None)
+        visible = visible_vertices(point_c, graph, ship, None)
         assert visible == [point_d, point_b]
         # This also tests collinearity
         visible = visible_vertices(ship, graph, ship, None)
-        assert visible == [point_c, point_d]
+        assert visible == [point_e, point_d]
 
     def test_visible_vertices_2(self):
         point_a = Point(0.0, 1.0)
@@ -153,19 +136,8 @@ class TestVisibleVertices:
         point_d = Point(5.0, 6.0)
         point_e = Point(6.0, 6.0)
         point_f = Point(6.0, 7.0)
-
-        edge_a = Edge(point_a, point_b)
-        edge_b = Edge(point_b, point_c)
-        edge_c = Edge(point_c, point_a)
-
-        edge_d = Edge(point_d, point_e)
-        edge_e = Edge(point_e, point_f)
-        edge_f = Edge(point_f, point_d)
-        polygon_a = Polygon([point_a, point_b, point_c],
-                            [edge_a, edge_b, edge_c])
-        polygon_b = Polygon([point_d, point_e, point_f],
-                            [edge_d, edge_e, edge_f])
-        graph = Graph([polygon_a, polygon_b])
+        graph = Graph([[point_a, point_b, point_c],
+                       [point_d, point_e, point_f]])
 
         ship = Point(4.0, 5.0)
         visible = visible_vertices(point_d, graph, ship, None)
@@ -187,19 +159,8 @@ class TestVisibleVertices:
         point_d = Point(3.0, 1.0)
         point_e = Point(5.0, 1.0)
         point_f = Point(4.0, 2.0)
-
-        edge_a = Edge(point_a, point_b)
-        edge_b = Edge(point_b, point_c)
-        edge_c = Edge(point_c, point_a)
-
-        edge_d = Edge(point_d, point_e)
-        edge_e = Edge(point_e, point_f)
-        edge_f = Edge(point_f, point_d)
-        polygon_a = Polygon([point_a, point_b, point_c],
-                            [edge_a, edge_b, edge_c])
-        polygon_b = Polygon([point_d, point_e, point_f],
-                            [edge_d, edge_e, edge_f])
-        graph = Graph([polygon_a, polygon_b])
+        graph = Graph([[point_a, point_b, point_c],
+                       [point_d, point_e, point_f]])
 
         ship = Point(6.0, 1.0)
         visible = visible_vertices(ship, graph, ship, None)
@@ -208,7 +169,7 @@ class TestVisibleVertices:
         visible = visible_vertices(ship, graph, ship, None)
         assert visible == [point_c, point_b, point_d, point_f]
 
-
+'''
 class TestShortestPaths:
 
     def setup_method(self, method):
@@ -362,3 +323,4 @@ class TestShortestPaths:
         fig.savefig("poly.png", bbox_inches='tight')
 
         assert shortest == [edge_a, edge_b, edge_c, edge_d]
+'''

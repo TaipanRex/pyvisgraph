@@ -1,4 +1,4 @@
-from graph import Point, Edge, Polygon, Graph, edge_distance
+from graph import Point, Edge, Graph, edge_distance
 
 
 # TODO: If two nodes have the same distance, will the algorithm break?

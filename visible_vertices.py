@@ -1,11 +1,11 @@
 from __future__ import print_function
 from math import pi, sqrt, atan, acos
-from graph import Point, Edge, Polygon, Graph, edge_distance
+from graph import Point, Edge, Graph, edge_distance
 
 
 def visible_vertices(point, graph, ship, port):
+    edges = set(graph.get_edges())
     points = graph.get_points()
-    edges = graph.get_edges()
     points.append(ship)
     points.remove(point)
 
@@ -25,37 +25,33 @@ def visible_vertices(point, graph, ship, port):
     previous_point = None
     ''' Visit all points in graph to check visibility from point. '''
     for p in points:
-        for edge in graph.get_point_edges(p):
+        for edge in graph[p]:
                 try:
                     open_edges.remove(edge)
                 except ValueError:
                     pass
 
-        if len(open_edges) == 0 or edge_distance(point, p) <= point_edge_distance(point, p, open_edges[0]):
+        is_visible = False
+        if not open_edges or edge_distance(point, p) <= point_edge_distance(point, p, open_edges[0]):
             if previous_point is not None and angle(point, p) == angle(point, previous_point):
                 if edge_distance(point, p) < edge_distance(point, previous_point):
-                    visible.append(p)
+                    is_visible = True
             else:
-                visible.append(p)
+                is_visible = True
+        ''' Check that visibility is not through a polygon '''
+        if p.polygon_id == point.polygon_id and p not in graph.get_adjacent_points(point):
+            is_visible = False
+        if is_visible:
+            visible.append(p)
 
         edge_order = []
-        for edge in graph.get_point_edges(p):
-            if (not edge.contains(point)) and counterclockwise(point, edge, p):
+        for edge in graph[p]:
+            if (point not in edge) and counterclockwise(point, edge, p):
                 edge_order.append((angle2(point, p, edge.get_adjacent(p)), edge))
         edge_order.sort(key=lambda x: x[0])
         for e in edge_order:
             open_edges.append(e[1])
         previous_point = p
-
-    # remove edges that cross through polygons. Must be a better way...
-    for polygon in graph.polygons:
-        if point in polygon.points:
-            for p in polygon.points:
-                if not Edge(point, p) in polygon.edges:
-                    try:
-                        visible.remove(p)
-                    except ValueError:
-                        pass
 
     return visible
 
@@ -143,7 +139,7 @@ def edge_intersect(point1, point2, edge):
     If edge contains either 'point1' or 'point2', return False.
     """
     edge_point1, edge_point2 = edge.points
-    if edge.contains(point1) or edge.contains(point2):
+    if point1 in edge or point2 in edge:
         return False
 
     if point1.x == point2.x:

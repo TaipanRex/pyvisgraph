@@ -1,11 +1,13 @@
 from math import sqrt
+from collections import defaultdict
 
 
 class Point:
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, polygon_id=None):
         self.x = x
         self.y = y
+        self.polygon_id = polygon_id
 
     def __eq__(self, point):
         if point is None:
@@ -23,20 +25,23 @@ class Point:
         point is x, y and other y, x?'''
         return self.x.__hash__() + self.y.__hash__()
 
+    def __repr__(self):
+        return "Point(%d, %d)" % (self.x, self.y)
+
 
 class Edge:
 
     def __init__(self, point1, point2):
         self.points = (point1, point2)
 
-    def contains(self, point):
-        return point in self.points
-
     def get_adjacent(self, point):
         point_a, point_b = self.points
         if point == point_a:
             return point_b
         return point_a
+
+    def __contains__(self, point):
+        return point in self.points
 
     def __eq__(self, edge):
         return set(self.points) == set(edge.points)
@@ -47,6 +52,9 @@ class Edge:
     def __str__(self):
         return "(" + ", ".join(str(p) for p in self.points) + ")"
 
+    def __repr__(self):
+        return "Edge(%s, %s)" % (self.points[0].__repr__(), self.points[1].__repr__())
+
     def __hash__(self):
         hash_val = 0
         for point in self.points:
@@ -54,65 +62,51 @@ class Edge:
         return hash_val
 
 
-class Polygon:
-
-    def __init__(self, points, edges):
-        self.points = []
-        self.edges = []
-        for point in points:
-            if point not in self.points:
-                self.points.append(point)
-        for edge in edges:
-            if edge not in self.edges:
-                self.edges.append(edge)
-
-    def add_point(self, point):
-        if point not in self.points:
-            self.points.append(point)
-
-    def add_edge(self, edge):
-        if edge not in self.edges:
-            self.edges.append(edge)
-
-    def __str__(self):
-        res = "Points: " + ', '.join(str(p) for p in self.points)
-        res += "\nEdges: " + ', '.join(str(e) for e in self.edges)
-        return res
-
-
 class Graph:
 
     '''TODO: polygons is a list of polygons, what if only one polygon is added
     i.e not a list?'''
     def __init__(self, polygons):
-        self.polygons = polygons
+        self.graph = defaultdict(list)
+        self.polygon_count = 0
+        for polygon in polygons:
+            self.polygon_count += 1
+
+            for i, point in enumerate(polygon):
+                point.polygon_id = self.polygon_count
+                sibling_point = polygon[(i+1) % len(polygon)]
+                edge = Edge(point, sibling_point)
+
+                if edge not in self.graph[point]:
+                    self.graph[point].append(edge)
+
+                if edge not in self.graph[sibling_point]:
+                    self.graph[sibling_point].append(edge)
+
+    def get_adjacent_points(self, point):
+        return [edge.get_adjacent(point) for edge in self.graph[point]]
 
     def get_points(self):
-        points = []
-        for polygon in self.polygons:
-            points += polygon.points
-        return points
+        return self.graph.keys()
 
     def get_edges(self):
-        edges = []
-        for polygon in self.polygons:
-            edges += polygon.edges
-        return edges
+        return [edge for edges in self.graph.values() for edge in edges]
 
-    def get_point_edges(self, point):
-        edges = []
-        for polygon in self.polygons:
-            for edge in polygon.edges:
-                if edge.contains(point):
-                    edges.append(edge)
-        return edges
+    def __getitem__(self, point):
+        if point in self.graph:
+            return self.graph[point]
+        return []
 
     def __str__(self):
-        s = ""
-        for i, polygon in enumerate(self.polygons):
-            s += "Polygon %d\n" % i
-            s += str(polygon)
-        return s
+        res = ""
+        for point in self.graph:
+            res += "\n" + str(point) + ": "
+            for edge in self.graph[point]:
+                res += str(edge)
+        return res
+
+    def __repr__(self):
+        return self.__str__()
 
 
 def edge_distance(point1, point2):
