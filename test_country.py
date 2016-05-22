@@ -26,11 +26,11 @@ def test_country():
     ax.plot(x, y, color='gray', alpha=0.7, linewidth=1,
             solid_capstyle='round', zorder=2)
 
-    for pp in graph.get_points():
-        visible = visible_vertices(pp, graph, ship, None)
-        for point in visible:
-            x = [pp.x, point.x]
-            y = [pp.y, point.y]
+    for point in graph.get_points():
+        visible = visible_vertices(point, graph, ship, None)
+        for p in visible:
+            x = [point.x, p.x]
+            y = [point.y, p.y]
             ax.plot(x, y, color='red', alpha=0.7, linewidth=1)
 
     ax.set_title("Python visibility graph")
