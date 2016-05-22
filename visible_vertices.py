@@ -30,9 +30,16 @@ def visible_vertices(point, graph, ship, port):
                     open_edges.remove(edge)
                 except ValueError:
                     pass
-
         is_visible = False
-        if not open_edges or edge_distance(point, p) <= point_edge_distance(point, p, open_edges[0]):
+        ''' Not ideal, checking each open_edge, but should be able to add new
+        open edges in sorted order, so you only check the closest edge.
+        Is likely due to concave polygons.'''
+        smallest_edge = float('inf')
+        for e in open_edges:
+            dist = point_edge_distance(point, p, e)
+            if dist < smallest_edge:
+                smallest_edge = dist
+        if not open_edges or edge_distance(point, p) <= smallest_edge:
             if previous_point is not None and angle(point, p) == angle(point, previous_point):
                 if edge_distance(point, p) < edge_distance(point, previous_point):
                     is_visible = True
@@ -44,6 +51,7 @@ def visible_vertices(point, graph, ship, port):
         if is_visible:
             visible.append(p)
 
+        ''' This should only be needed if I fix open_edges order '''
         edge_order = []
         for edge in graph[p]:
             if (point not in edge) and counterclockwise(point, edge, p):
@@ -64,6 +72,7 @@ def angle2(point_a, point_b, point_c):
 
 
 def counterclockwise(point, edge, endpoint):
+    ''' TODO: merge with ccw() '''
     edge_point1, edge_point2 = edge.points
     if edge_point1 == endpoint:
         angle_diff = angle(point, edge_point2) - angle(point, endpoint)
@@ -112,49 +121,33 @@ def angle(center, point):
     """
     dx = point.x - center.x
     dy = point.y - center.y
-
     if dx == 0:
         if dy < 0:
             return pi*3 / 2
-        else:
-            return pi / 2
+        return pi / 2
     if dy == 0:
         if dx < 0:
             return pi
-        else:
-            return 0
-
+        return 0
     if dx < 0:
         return pi + atan(dy/dx)
     if dy < 0:
         return 2*pi + atan(dy/dx)
-
     return atan(dy/dx)
 
 
-def edge_intersect(point1, point2, edge):
+def ccw(A, B, C):
+    return (C.y-A.y) * (B.x-A.x) > (B.y-A.y) * (C.x-A.x)
+
+
+def edge_intersect(A, B, edge):
     """
-    Return True if 'edge' is interesected by the line going
-    through 'point1' and 'point2', False otherwise.
-    If edge contains either 'point1' or 'point2', return False.
+    Return True if 'edge' is interesected by the line going through 'A' and
+    'B', False otherwise. If edge contains either 'A' or 'B', return False.
+    TODO: May be an issue with colinerity here. See:
+    http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
     """
-    edge_point1, edge_point2 = edge.points
-    if point1 in edge or point2 in edge:
+    C, D = edge.points
+    if A in edge or B in edge:
         return False
-
-    if point1.x == point2.x:
-        x1_left = edge_point1.x < point1.x
-        x2_left = edge_point2.x < point1.x
-        return not (x1_left == x2_left)
-
-    slope = (point1.y - point2.y) / (point1.x - point2.x)
-
-    y1_ex = slope * (edge_point1.x - point1.x) + point1.y
-    y2_ex = slope * (edge_point2.x - point1.x) + point1.y
-
-    if y1_ex == edge_point1.y or y2_ex == edge_point2.y:
-        return False
-
-    y1_below = (y1_ex > edge_point1.y)
-    y2_below = (y2_ex > edge_point2.y)
-    return not (y1_below == y2_below)
+    return ccw(A, C, D) != ccw(B, C, D) and ccw(A, B, C) != ccw(A, B, D)

@@ -43,6 +43,7 @@ class Edge:
     def __contains__(self, point):
         return point in self.points
 
+    # TODO: This runs slow, self.points should be a set in __init__
     def __eq__(self, edge):
         return set(self.points) == set(edge.points)
 
@@ -86,6 +87,7 @@ class Graph:
     def get_adjacent_points(self, point):
         return [edge.get_adjacent(point) for edge in self.graph[point]]
 
+    ''' should return a generator/iterator '''
     def get_points(self):
         return self.graph.keys()
 
