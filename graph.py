@@ -1,3 +1,4 @@
+from __future__ import division
 from math import sqrt
 from collections import defaultdict
 
@@ -66,7 +67,9 @@ class Edge:
 class Graph:
 
     '''TODO: polygons is a list of polygons, what if only one polygon is added
-    i.e not a list?'''
+    i.e not a list?
+    Edges are also generated weirdly
+    Need to store as separate polygons'''
     def __init__(self, polygons):
         self.graph = defaultdict(list)
         self.polygon_count = 0
@@ -87,12 +90,13 @@ class Graph:
     def get_adjacent_points(self, point):
         return [edge.get_adjacent(point) for edge in self.graph[point]]
 
-    ''' should return a generator/iterator '''
+    ''' should return a generator/iterator? or does it already? '''
     def get_points(self):
         return self.graph.keys()
 
+    ''' bad code '''
     def get_edges(self):
-        return [edge for edges in self.graph.values() for edge in edges]
+        return set([edge for edges in self.graph.values() for edge in edges])
 
     def __getitem__(self, point):
         if point in self.graph:
