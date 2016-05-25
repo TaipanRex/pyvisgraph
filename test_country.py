@@ -18,7 +18,7 @@ def test_country():
 
     poly1 = [Point(a[0], a[1]) for a in shapes[4].points]
     graph = Graph([poly1])
-    ship = Point(-71, -20)
+    ship = Point(-50, -40)
     port = Point(-50, 10)
 
     fig = plt.figure(1, figsize=(10, 10), dpi=90)
@@ -58,7 +58,7 @@ def test_country():
     #print shortest
     ax.plot(x, y, color='green', alpha=0.7, linewidth=2.0)
 
-    ax.set_title("Python visibility graph")
+    ax.set_title("Python visibility graph & shortest path")
     ax.annotate('Origin', xytext=(ship.x,ship.y), xy=(ship.x,ship.y))
     ax.annotate('Destination', xytext=(port.x,port.y), xy=(port.x,port.y))
     fig.savefig("poly.png", bbox_inches='tight')

@@ -50,7 +50,7 @@ def visible_vertices(point, graph, ship, port):
                 is_visible = True
         ''' Check that visibility is not through a polygon.'''
         if is_visible and p.polygon_id == point.polygon_id and p not in graph.get_adjacent_points(point):
-            is_visible = point_in_poly(point, p, graph)
+            is_visible = point_in_polygon(point, p, graph)
 
         if is_visible:
             visible.append(p)
@@ -68,18 +68,19 @@ def visible_vertices(point, graph, ship, port):
     return visible
 
 
-def point_in_poly(p1, p2, graph):
-    pc1 = Point((p1.x+p2.x)/2, (p1.y+p2.y)/2)
-    pc2 = Point(10000000.0, pc1.y)
-    counts = 0
-    for e in graph.get_edges():
-        if e.points[0].polygon_id == p1.polygon_id:
-            if edge_intersect(pc1, pc2, e):
-                counts = counts + 1
-    if counts % 2 == 0:
+def point_in_polygon(p1, p2, graph):
+    mid_point = Point((p1.x+p2.x)/2, (p1.y+p2.y)/2)
+    mid_point_end = Point(float('inf'), mid_point.y)
+    intersect_count = 0
+    for edge in graph.get_edges():
+        ''' TODO: When make a Polygon class, must pull edges from that and not
+        from the whole graph as below '''
+        if edge.points[0].polygon_id == p1.polygon_id:
+            if edge_intersect(mid_point, mid_point_end, edge):
+                intersect_count += 1
+    if intersect_count % 2 == 0:
         return True
-    else:
-        return False
+    return False
 
 
 def angle2(point_a, point_b, point_c):
