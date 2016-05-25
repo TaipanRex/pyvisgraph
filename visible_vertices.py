@@ -1,4 +1,3 @@
-from __future__ import print_function
 from __future__ import division
 from math import pi, sqrt, atan, acos
 from graph import Point, Edge, Graph, edge_distance
@@ -59,7 +58,7 @@ def visible_vertices(point, graph, ship, port):
         ''' Add edges in order TODO: add into AVL-Tree '''
         edge_order = []
         for edge in graph[p]:
-            if (point not in edge) and counterclockwise(point, edge, p):
+            if (point not in edge) and ccw(point, p, edge.get_adjacent(p)):
                 edge_order.append((angle2(point, p, edge.get_adjacent(p)), edge))
         edge_order.sort(key=lambda x: x[0])
         for e in edge_order:
@@ -88,19 +87,6 @@ def angle2(point_a, point_b, point_c):
     b = edge_distance(point_a, point_c)
     c = edge_distance(point_a, point_b)
     return acos((a**2 + c**2 - b**2) / (2*a*c))
-
-
-def counterclockwise(point, edge, endpoint):
-    ''' TODO: merge with ccw() '''
-    edge_point1, edge_point2 = edge.points
-    if edge_point1 == endpoint:
-        angle_diff = angle(point, edge_point2) - angle(point, endpoint)
-    else:
-        angle_diff = angle(point, edge_point1) - angle(point, endpoint)
-
-    if angle_diff <= 0:
-        angle_diff += 2 * pi
-    return angle_diff < pi
 
 
 def point_edge_distance(point1, point2, edge):

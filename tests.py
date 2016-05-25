@@ -1,7 +1,7 @@
 from __future__ import division
 from graph import Graph, Point, Edge
 from visible_vertices import (edge_intersect, point_edge_distance,
-                              visible_vertices, angle)
+                              visible_vertices, angle, ccw, counterclockwise)
 from shortest_path import shortest_path
 import pytest
 from math import pi, degrees
