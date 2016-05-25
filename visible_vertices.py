@@ -13,7 +13,8 @@ def visible_vertices(point, graph, ship, port):
     points.remove(point)
 
     ''' Sort points by angle from x-axis with point as center. If angle is same,
-    sort by point closest to center. '''
+    sort by point closest to center. TODO: What is the runtime of this? Should
+    be nlogn'''
     points.sort(key=lambda p: (angle(point, p), edge_distance(point, p)))
 
     ''' Initialize open_edges list with any intersecting edges from point to
@@ -36,7 +37,7 @@ def visible_vertices(point, graph, ship, port):
         is_visible = False
         ''' Not ideal, checking each open_edge, but should be able to add new
         open edges in sorted order, so you only check the closest edge.
-        Is likely due to concave polygons.'''
+        TODO: Implement AVL-Tree'''
         smallest_edge = float('inf')
         for e in open_edges:
             dist = point_edge_distance(point, p, e)
@@ -55,7 +56,7 @@ def visible_vertices(point, graph, ship, port):
         if is_visible:
             visible.append(p)
 
-        ''' This should only be needed if I fix open_edges order '''
+        ''' Add edges in order TODO: add into AVL-Tree '''
         edge_order = []
         for edge in graph[p]:
             if (point not in edge) and counterclockwise(point, edge, p):

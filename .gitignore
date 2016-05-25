@@ -2,6 +2,7 @@ __pycache__
 *.pyc
 *.pdf
 *.pptx
+*.JPG
 poly.png
 .cache
 .idea
