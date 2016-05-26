@@ -1,9 +1,35 @@
+"""
+The MIT License (MIT)
+
+Copyright (c) 2016 Christian August Reksten-Monsen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 from __future__ import division
 from math import pi, sqrt, atan, acos
-from graph import Point, Edge, Graph, edge_distance
+from graph import Point, Edge, Graph
 
 
+# TODO: remove ship, port, this should be in visibility_graph in a new file
 def visible_vertices(point, graph, ship, port):
+    """Returns list of Points in 'graph' visible by 'point'.
+    """
     edges = graph.get_edges()
     points = graph.get_points()
     points.append(ship)
@@ -11,9 +37,9 @@ def visible_vertices(point, graph, ship, port):
         points.append(port)
     points.remove(point)
 
-    ''' Sort points by angle from x-axis with point as center. If angle is same,
-    sort by point closest to center. TODO: What is the runtime of this? Should
-    be nlogn'''
+    # Sort points by angle from x-axis with point as center. If angle is same,
+    # sort by point closest to center.
+    # TODO: Check list.sort() runtime, need O(nlogn)
     points.sort(key=lambda p: (angle(point, p), edge_distance(point, p)))
 
     ''' Initialize open_edges list with any intersecting edges from point to
@@ -48,7 +74,9 @@ def visible_vertices(point, graph, ship, port):
                     is_visible = True
             else:
                 is_visible = True
-        ''' Check that visibility is not through a polygon.'''
+        ''' Check that visibility is not through a polygon.
+        TODO: If polygon is convex, it is simple to check pip().
+        http://stackoverflow.com/questions/471962/how-do-determine-if-a-polygon-is-complex-convex-nonconvex'''
         if is_visible and p.polygon_id == point.polygon_id and p not in graph.get_adjacent_points(point):
             is_visible = point_in_polygon(point, p, graph)
 
@@ -90,6 +118,13 @@ def angle2(point_a, point_b, point_c):
     return acos((a**2 + c**2 - b**2) / (2*a*c))
 
 
+def edge_distance(point1, point2):
+    """
+    Return the Euclidean distance between two Points.
+    """
+    return sqrt((point2.x - point1.x)**2 + (point2.y - point1.y)**2)
+
+
 def point_edge_distance(point1, point2, edge):
     """
     The line going from point1 to point2, intersects edge before reaching
@@ -121,10 +156,7 @@ def point_edge_distance(point1, point2, edge):
 
 
 def angle(center, point):
-    """
-    Return the angle of 'point' where 'center' is the center of
-    the radian circle.
-    """
+    """Return the angle of 'point' from the 'center' of the radian circle."""
     dx = point.x - center.x
     dy = point.y - center.y
     if dx == 0:
