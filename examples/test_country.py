@@ -7,13 +7,14 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
-from graph import Graph, Point, Edge
-from visible_vertices import (edge_intersect, point_edge_distance,
-                              visible_vertices, angle)
-from shortest_path import shortest_path
+from vis_graph.graph import Graph, Point, Edge
+from vis_graph.visible_vertices import (edge_intersect, point_edge_distance,
+                                        visible_vertices, angle)
+from vis_graph.shortest_path import shortest_path
+
 
 def test_country():
-    sf = shapefile.Reader("examples/GSHHS_c_L1.dbf")
+    sf = shapefile.Reader("examples/shapefiles/GSHHS_c_L1.dbf")
     shapes = sf.shapes()
 
     poly1 = [Point(a[0], a[1]) for a in shapes[4].points]
