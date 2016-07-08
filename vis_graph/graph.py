@@ -92,7 +92,8 @@ class Graph:
     '''TODO: polygons is a list of polygons, what if only one polygon is added
     i.e not a list?
     Edges are also generated weirdly
-    Need to store as separate polygons'''
+    Need to store as separate polygons
+    TODO: graph should be defaultdict(set), so vis_graph can be simplified'''
     def __init__(self, polygons):
         self.graph = defaultdict(list)
         self.polygon_count = 0
