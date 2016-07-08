@@ -30,22 +30,11 @@ def vis_graph(graph=None, origin=None, destination=None):
     # TODO: Only check half circle of vertices.
     # TODO: origin and destination should not be given here. it should be part
     # of 'graph'
-    visible = set()
-    for point in graph.get_points():
-        points_visible = visible_vertices(point, graph, origin, destination)
-        v = [Edge(point, p) for p in points_visible]
-        visible = visible | set(v)
-
     visibility_graph = Graph([])
-    tmp_dict = defaultdict(list)
-    for edge in visible:
-        p1, p2 = edge.points
-
-        if edge not in tmp_dict[p1]:
-            tmp_dict[p1].append(edge)
-
-        if edge not in tmp_dict[p2]:
-            tmp_dict[p2].append(edge)
-    visibility_graph.graph = tmp_dict
+    for point1 in graph.get_points():
+        for point2 in visible_vertices(point1, graph, origin, destination):
+            edge = Edge(point1, point2)
+            visibility_graph.graph[point1].add(edge)
+            visibility_graph.graph[point2].add(edge)
 
     return visibility_graph

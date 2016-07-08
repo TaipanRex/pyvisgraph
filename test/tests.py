@@ -81,7 +81,7 @@ def test_angle_function():
     point_e = Point(2.0, 0.0)
     point_f = Point(0.0, 0.0)
     assert angle(center, point_a) == 0
-    assert angle(center, point_b) == pi*3 / 2
+    assert angle(center, point_b) == pi * 3 / 2
     assert degrees(angle(center, point_c)) == 135
     assert degrees(angle(center, point_d)) == 45
     assert degrees(angle(center, point_e)) == 315

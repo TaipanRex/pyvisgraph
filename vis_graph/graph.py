@@ -95,21 +95,17 @@ class Graph:
     Need to store as separate polygons
     TODO: graph should be defaultdict(set), so vis_graph can be simplified'''
     def __init__(self, polygons):
-        self.graph = defaultdict(list)
+        self.graph = defaultdict(set)
         self.polygon_count = 0
         for polygon in polygons:
             self.polygon_count += 1
 
             for i, point in enumerate(polygon):
                 point.polygon_id = self.polygon_count
-                sibling_point = polygon[(i+1) % len(polygon)]
+                sibling_point = polygon[(i + 1) % len(polygon)]
                 edge = Edge(point, sibling_point)
-
-                if edge not in self.graph[point]:
-                    self.graph[point].append(edge)
-
-                if edge not in self.graph[sibling_point]:
-                    self.graph[sibling_point].append(edge)
+                self.graph[point].add(edge)
+                self.graph[sibling_point].add(edge)
 
     def get_adjacent_points(self, point):
         return [edge.get_adjacent(point) for edge in self.graph[point]]
