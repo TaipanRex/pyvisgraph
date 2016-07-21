@@ -23,10 +23,10 @@ SOFTWARE.
 """
 from collections import defaultdict
 from graph import Graph, Point, Edge
-from visible_vertices import visible_vertices
+from visible_vertices import visible_vertices, edge_intersect
 
 
-def vis_graph(graph=None, origin=None, destination=None):
+def vis_graph(graph, origin=None, destination=None):
     # TODO: Only check half circle of vertices.
     # TODO: origin and destination should not be given here. it should be part
     # of 'graph'
@@ -37,4 +37,31 @@ def vis_graph(graph=None, origin=None, destination=None):
             visibility_graph.graph[point1].add(edge)
             visibility_graph.graph[point2].add(edge)
 
+    graph_edges = graph.get_edges()
+    for edge in visibility_graph.get_edges():
+        p1 = edge.points[0]
+        p2 = edge.points[1]
+        if point_in_polygon(p1, p2, graph_edges):
+            visibility_graph[p1].remove(edge)
+            visibility_graph[p2].remove(edge)
+            if len(visibility_graph[p1]) == 0:
+                visibility_graph.graph.pop(p1)
+            if len(visibility_graph[p2]) == 0:
+                visibility_graph.graph.pop(p2)
+
     return visibility_graph
+
+
+def point_in_polygon(p1, p2, graph_edges):
+    mid_point = Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
+    mid_point_end = Point(float('inf'), mid_point.y)
+    intersect_count = 0
+    for edge in graph_edges:
+        # TODO: Implement a Polygon class. Pull edges from that and not
+        # from the whole graph as below.
+        if edge.points[0].polygon_id == p1.polygon_id:
+            if edge_intersect(mid_point, mid_point_end, edge):
+                intersect_count += 1
+    if intersect_count % 2 == 0:
+        return True
+    return False
