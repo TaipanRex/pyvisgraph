@@ -39,7 +39,6 @@ def visible_vertices(point, graph, origin=None, destination=None):
     points = graph.get_points()
     if origin: points.append(origin)
     if destination: points.append(destination)
-    points.remove(point)
     points.sort(key=lambda p: (angle(point, p), edge_distance(point, p)))
 
     # Initialize open_edges list with any intersecting edges from point to
@@ -55,6 +54,7 @@ def visible_vertices(point, graph, origin=None, destination=None):
     visible = []
     prev_point = None
     for p in points:
+        if p == point: continue
         for edge in graph[p]:
                 try:
                     open_edges.remove(edge)
