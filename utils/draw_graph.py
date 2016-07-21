@@ -38,3 +38,4 @@ def draw_graph(polygons):
 
     ax.set_title("Plot polygons")
     fig.savefig("plot.png", bbox_inches='tight')
+draw_graph([[Point(0.0, 1.0), Point(1.0, 1.0), Point(1.0, 2.0), Point(0.0, 1.0)], [Point(5.0, 6.0), Point(6.0, 6.0), Point(6.0, 7.0), Point(5.0, 6.0)], [Point(4.0, 5.0)]])

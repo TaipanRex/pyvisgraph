@@ -37,8 +37,8 @@ def visible_vertices(point, graph, origin=None, destination=None):
     """
     edges = graph.get_edges()
     points = graph.get_points()
-    if origin and origin != point: points.append(origin)
-    if destination and destination != point: points.append(destination)
+    if origin: points.append(origin)
+    if destination: points.append(destination)
     points.remove(point)
     points.sort(key=lambda p: (angle(point, p), edge_distance(point, p)))
 

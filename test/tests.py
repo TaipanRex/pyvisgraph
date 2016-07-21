@@ -139,8 +139,6 @@ class TestVisibleVertices:
         assert visible == [point_b, point_e]
         visible = visible_vertices(point_b, graph, ship, None)
         assert visible == [point_c, point_a]
-        visible = visible_vertices(point_e, graph, ship, None)
-        assert visible == [point_d, ship, point_a]
         visible = visible_vertices(point_d, graph, ship, None)
         assert visible == [ship, point_e, point_c]
         # This also tests collinearity
@@ -149,6 +147,9 @@ class TestVisibleVertices:
         # This also tests collinearity
         visible = visible_vertices(ship, graph, ship, None)
         assert visible == [point_e, point_d]
+        # Tests collinearity of point_in_polygon
+        visible = visible_vertices(point_e, graph, ship, None)
+        assert visible == [point_d, ship, point_a]
 
     def test_visible_vertices_2(self):
         point_a = Point(0.0, 1.0)
@@ -160,8 +161,8 @@ class TestVisibleVertices:
         point_f = Point(6.0, 7.0)
         graph = Graph([[point_a, point_b, point_c],
                        [point_d, point_e, point_f]])
-
         ship = Point(4.0, 5.0)
+
         visible = visible_vertices(point_d, graph, ship, None)
         assert visible == [point_e, point_f, ship, point_b]
         visible = visible_vertices(ship, graph, ship, None)
