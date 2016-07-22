@@ -87,15 +87,17 @@ class Edge:
         return hash_val
 
 
+''' TODO: Change to __addatrr__ (I think), so that doing graph[p].add(edges)
+    also adds it to the edges set.'''
 class Graph:
 
     '''TODO: polygons is a list of polygons, what if only one polygon is added
     i.e not a list?
-    Edges are also generated weirdly
-    Need to store as separate polygons
+    TODO: Need to store as separate polygons
     TODO: graph should be defaultdict(set), so vis_graph can be simplified'''
     def __init__(self, polygons):
         self.graph = defaultdict(set)
+        self.edges = set()
         self.polygon_count = 0
         for polygon in polygons:
             self.polygon_count += 1
@@ -106,6 +108,7 @@ class Graph:
                 edge = Edge(point, sibling_point)
                 self.graph[point].add(edge)
                 self.graph[sibling_point].add(edge)
+                self.edges.add(edge)
 
     def get_adjacent_points(self, point):
         return [edge.get_adjacent(point) for edge in self.graph[point]]
@@ -114,9 +117,13 @@ class Graph:
     def get_points(self):
         return self.graph.keys()
 
-    ''' bad code '''
     def get_edges(self):
-        return set([edge for edges in self.graph.values() for edge in edges])
+        return self.edges
+
+    def add_edge(self, edge):
+        self.graph[edge.points[0]].add(edge)
+        self.graph[edge.points[1]].add(edge)
+        self.edges.add(edge)
 
     def __getitem__(self, point):
         if point in self.graph:
