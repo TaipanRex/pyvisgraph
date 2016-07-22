@@ -22,10 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from __future__ import division
-import cProfile
-import pstats
 import shapefile
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from vis_graph.graph import Graph, Point, Edge
 from vis_graph.shortest_path import shortest_path
 from vis_graph.vis_graph import vis_graph
@@ -40,7 +38,8 @@ def test_country():
     ship = Point(-50, -40)
     port = Point(-50, 10)
     op_net = vis_graph(graph, ship, port)
-
+    print "Operating network size: {}".format(len(op_net.get_edges()))
+    '''
     fig = plt.figure(1, figsize=(10, 10), dpi=90)
     ax = fig.add_subplot(111)
 
@@ -55,9 +54,8 @@ def test_country():
         x = [e.points[0].x, e.points[1].x]
         y = [e.points[0].y, e.points[1].y]
         ax.plot(x, y, color='red', alpha=0.5, linewidth=0.5)
-    print "Operating network size: {}".format(len(op_net.get_edges()))
 
-    ''' Hacky test of shortest path '''
+    # Hacky test of shortest path
     shortest = shortest_path(op_net, ship, port)
     print "Shorest path hops: {}".format(len(shortest))
     x = [v.x for v in shortest]
@@ -69,8 +67,7 @@ def test_country():
     ax.annotate('Origin', xytext=(ship.x, ship.y), xy=(ship.x, ship.y))
     ax.annotate('Destination', xytext=(port.x, port.y), xy=(port.x, port.y))
     fig.savefig("poly.png", bbox_inches='tight')
+    '''
 
-cProfile.run('test_country()', 'runtime')
-p = pstats.Stats('runtime')
-p.sort_stats('cumulative').print_stats(10)
-p.sort_stats('time').print_stats(10)
+if __name__ == "__main__":
+    test_country()
