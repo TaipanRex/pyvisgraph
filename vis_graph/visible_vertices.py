@@ -172,7 +172,8 @@ def angle2(point_a, point_b, point_c):
     a = edge_distance(point_b, point_c)
     b = edge_distance(point_a, point_c)
     c = edge_distance(point_a, point_b)
-    return acos((a**2 + c**2 - b**2) / (2 * a * c))
+    x = round((a**2 + c**2 - b**2) / (2 * a * c), 6)
+    return acos(x)
 
 
 def ccw(A, B, C):
