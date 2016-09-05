@@ -31,11 +31,12 @@ from vis_graph.vis_graph import vis_graph, visible_vertices
 
 
 def test_country():
-    sf = shapefile.Reader("examples/shapefiles/GSHHS_c_L1.dbf")
+    #sf = shapefile.Reader("examples/shapefiles/GSHHS_c_L1.dbf")
+    sf = shapefile.Reader("examples/shapefiles/ne_110m_coastline.shp")
     shapes = sf.shapes()
     polys = []
     # was shapes[4]
-    for i in range(4, 5):
+    for i in range(0, len(shapes)):
         polys.append([Point(a[0], a[1]) for a in shapes[i].points])
     graph = Graph(polys)
     print "Graph points: {} edges: {}".format(len(graph.graph), len(graph.get_edges()))

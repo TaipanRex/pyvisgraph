@@ -24,15 +24,18 @@ SOFTWARE.
 from collections import defaultdict
 from graph import Graph, Point, Edge
 from visible_vertices import visible_vertices, edge_intersect
-
+import time
 
 def vis_graph(graph, origin=None, destination=None):
     # TODO: Only check half circle of vertices.
     # TODO: origin and destination should not be given here. it should be part
     # of 'graph'
     visibility_graph = Graph([])
-    for point1 in graph.get_points():
+    for i, point1 in enumerate(graph.get_points()):
+        t0 = time.clock()
         for point2 in visible_vertices(point1, graph, origin, destination):
             visibility_graph.add_edge(Edge(point1, point2))
+        t1 = time.clock()
+        print "Completed point: {} - time: {}".format(i, t1 - t0)
 
     return visibility_graph
