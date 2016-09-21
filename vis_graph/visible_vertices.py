@@ -47,7 +47,7 @@ def visible_vertices(point, graph, origin=None, destination=None):
     # better than list sort O(nlogn), delete O(n).
     open_edges = []
     for edge in edges:
-        if edge_intersect(point, points[0], edge):
+        if edge_intersect(point, points[0], edge) or edge_intersect(point, points[1], edge):
             open_edges.append(edge)
     open_edges.sort(key=lambda e: point_edge_distance(point, points[0], edge))
 
