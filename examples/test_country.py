@@ -35,7 +35,7 @@ def test_country():
     sf = shapefile.Reader("examples/shapefiles/GSHHS_c_L1.dbf")
     shapes = sf.shapes()
     polys = []
-    counter = 0
+    #counter = 0
     #for c, shape in enumerate(shapes):
     #    if len(shape.points) > 100:
     #        print c
@@ -45,15 +45,20 @@ def test_country():
     for i in range(0, len(shapes)):
         polys.append([Point(a[0], a[1]) for a in shapes[i].points])
 
-    #polys.append([Point(a[0], a[1]) for a in shapes[0].points])
-    '''
-    for a in shapes[3].points:
-        p = Point(a[0], a[1])
-        if p.x > -86.0 and p.x <-78.0 and p.y>20.0 and p.y<35.0:
-            polys.append(p)
-    polys = [polys]
-    polys[0].append(polys[0][0])
-    '''
+    #polys.append([Point(a[0], a[1]) for a in shapes[4].points])
+
+    #for shape in shapes:
+    #    poly = []
+    #    for a in shape.points:
+    #        p = Point(a[0], a[1])
+    #        if p.x > -60.0 and p.x < 34.0 and p.y > 45.0 and p.y <= 46.4:
+    #            poly.append(p)
+    #    if len(poly) > 0:
+    #        polys.append(poly)
+    #polys[0].append(polys[0][0])
+    for poly in polys:
+        print poly
+
     graph = Graph(polys)
     print "Graph points: {} edges: {}".format(len(graph.graph), len(graph.get_edges()))
 
@@ -89,10 +94,11 @@ def test_country():
         ax.plot(x, y, color='black', alpha=0.7, linewidth=1,
                 solid_capstyle='round', zorder=2)
 #    for poly in polys:
-#        for p in poly:
+#        for i, p in enumerate(poly):
 #            if p.x > -73.7 and p.x < -71.9:
 #                if p.y > 68.0 and p.y < 70.5:
-#            ax.annotate('{:.2f},{:.2f}'.format(p.x, p.y), xytext=(p.x, p.y), xy=(p.x, p.y))
+#            if i == 65:
+#                ax.annotate('{:.2f},{:.2f}'.format(p.x, p.y), xytext=(p.x, p.y), xy=(p.x, p.y))
 
     # Draw the visibility graph
     for e in op_net.get_edges():
