@@ -101,23 +101,30 @@ def visible_vertices(point, graph, origin=None, destination=None):
 
 
 def point_in_polygon(p1, p2, graph_edges):
-    mid_point = Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
-    mid_point_end = Point(float('inf'), mid_point.y)
+    mid_p1 = Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
+    mid_p2 = Point(float('inf'), mid_p1.y)
     intersect_count = 0
-    colin_flag = False
+    co_flag = False
+    co_dir = 0
     for edge in graph_edges:
         # TODO: Implement a Polygon class. Pull edges from that and not
         # from the whole graph as below.
         if edge.points[0].polygon_id == p1.polygon_id:
-            colin1 = ccw(mid_point, edge.points[0], mid_point_end)
-            colin2 = ccw(mid_point, edge.points[1], mid_point_end)
-            if colin1 == 0 or colin2 == 0:
-                if colin_flag:
-                    intersect_count += 1
-                    colin_flag = False
+            co0 = ccw(mid_p1, edge.points[0], mid_p2) == 0 and edge.points[0].x > mid_p1.x
+            co1 = ccw(mid_p1, edge.points[1], mid_p2) == 0 and edge.points[1].x > mid_p1.x
+            co_point = edge.points[0] if co0 else edge.points[1]
+            if co0 or co1:
+                if co_point.y > mid_p1.y:
+                    co_dir += 1
                 else:
-                    colin_flag = True
-            elif edge_intersect(mid_point, mid_point_end, edge):
+                    co_dir -= 1
+                if co_flag:
+                    if co_dir == 0: intersect_count += 1
+                    co_flag = False
+                    co_dir = 0
+                else:
+                    co_flag = True
+            elif edge_intersect(mid_p1, mid_p2, edge):
                 intersect_count += 1
     if intersect_count % 2 == 0:
         return True
