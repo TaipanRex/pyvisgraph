@@ -90,7 +90,7 @@ def visible_vertices(point, graph, origin=None, destination=None):
         # TODO: Add edges, if any, into AVL-Tree when implemented
         edge_order = []
         for edge in graph[p]:
-            if (point not in edge) and ccw(point, p, edge.get_adjacent(p)):
+            if (point not in edge) and ccw(point, p, edge.get_adjacent(p)) == 1:
                 edge_order.append((angle2(point, p, edge.get_adjacent(p)), edge))
         edge_order.sort(key=lambda x: x[0])
         for e in edge_order:
@@ -104,11 +104,20 @@ def point_in_polygon(p1, p2, graph_edges):
     mid_point = Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
     mid_point_end = Point(float('inf'), mid_point.y)
     intersect_count = 0
+    colin_flag = False
     for edge in graph_edges:
         # TODO: Implement a Polygon class. Pull edges from that and not
         # from the whole graph as below.
         if edge.points[0].polygon_id == p1.polygon_id:
-            if edge_intersect(mid_point, mid_point_end, edge):
+            colin1 = ccw(mid_point, edge.points[0], mid_point_end)
+            colin2 = ccw(mid_point, edge.points[1], mid_point_end)
+            if colin1 == 0 or colin2 == 0:
+                if colin_flag:
+                    intersect_count += 1
+                    colin_flag = False
+                else:
+                    colin_flag = True
+            elif edge_intersect(mid_point, mid_point_end, edge):
                 intersect_count += 1
     if intersect_count % 2 == 0:
         return True
@@ -177,7 +186,10 @@ def angle2(point_a, point_b, point_c):
 
 
 def ccw(A, B, C):
-    return (C.y - A.y) * (B.x - A.x) > (B.y - A.y) * (C.x - A.x)
+    area = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x)
+    if area > 0: return 1  # ccw
+    if area < 0: return -1  # cw
+    return 0  # collinear
 
 
 def edge_intersect(A, B, edge):
