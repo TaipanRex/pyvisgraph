@@ -26,7 +26,7 @@ from math import pi, sqrt, atan, acos
 from graph import Point, Edge, Graph
 
 
-def visible_vertices(point, graph, origin=None, destination=None):
+def visible_vertices(point, graph, origin=None, destination=None, init_depth=1):
     """Returns list of Points in 'graph' visible by 'point'.
 
     Args:
@@ -47,8 +47,9 @@ def visible_vertices(point, graph, origin=None, destination=None):
     # better than list sort O(nlogn), delete O(n).
     open_edges = []
     for edge in edges:
-        if edge_intersect(point, points[0], edge) or edge_intersect(point, points[1], edge):
-            open_edges.append(edge)
+        for i in range(0, init_depth):
+            if edge_intersect(point, points[i], edge):
+                open_edges.append(edge)
     open_edges.sort(key=lambda e: point_edge_distance(point, points[0], edge))
 
     visible = []
