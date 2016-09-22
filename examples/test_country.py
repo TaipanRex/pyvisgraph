@@ -25,6 +25,7 @@ from __future__ import division
 import shapefile
 import matplotlib.pyplot as plt
 import time
+import pickle
 from vis_graph.graph import Graph, Point, Edge
 from vis_graph.shortest_path import shortest_path
 from vis_graph.vis_graph import vis_graph, visible_vertices
@@ -35,37 +36,30 @@ def test_country():
     sf = shapefile.Reader("examples/shapefiles/GSHHS_c_L1.dbf")
     shapes = sf.shapes()
     polys = []
-    #counter = 0
-    #for c, shape in enumerate(shapes):
-    #    if len(shape.points) > 100:
-    #        print c
-    #        counter = counter + 1
-    #print counter
 
-    for i in range(0, len(shapes)):
-        polys.append([Point(a[0], a[1]) for a in shapes[i].points])
+    #polys.append([Point(a[0], a[1]) for a in shapes[5].points])
 
-    #polys.append([Point(a[0], a[1]) for a in shapes[4].points])
-
-    #for shape in shapes:
-    #    poly = []
-    #    for a in shape.points:
-    #        p = Point(a[0], a[1])
-    #        if p.x > -60.0 and p.x < 34.0 and p.y > 45.0 and p.y <= 46.4:
-    #            poly.append(p)
-    #    if len(poly) > 0:
-    #        polys.append(poly)
-    #polys[0].append(polys[0][0])
-    for poly in polys:
-        print poly
+    for shape in shapes:
+        poly = []
+        if len(shape.points) > 4:
+            for a in shape.points:
+                p = Point(a[0], a[1])
+                poly.append(p)
+            polys.append(poly)
 
     graph = Graph(polys)
     print "Graph points: {} edges: {}".format(len(graph.graph), len(graph.get_edges()))
 
     t0 = time.clock()
-    op_net = vis_graph(graph)
+    #op_net = None
+    #with open('visgraph.pk1', 'rb') as load:
+    #    op_net = pickle.load(load)
+    op_net = vis_graph(graph, init_depth=3)
     t1 = time.clock()
     print "Time to create visibility graph: {}".format(t1 - t0)
+
+    with open('visgraph.pk1', 'wb') as output:
+        pickle.dump(op_net, output, -1)
 
     #t2 = time.clock()
     #origin = Point(-50, -40)
@@ -93,12 +87,6 @@ def test_country():
         y = [a.y for a in poly]
         ax.plot(x, y, color='black', alpha=0.7, linewidth=1,
                 solid_capstyle='round', zorder=2)
-#    for poly in polys:
-#        for i, p in enumerate(poly):
-#            if p.x > -73.7 and p.x < -71.9:
-#                if p.y > 68.0 and p.y < 70.5:
-#            if i == 65:
-#                ax.annotate('{:.2f},{:.2f}'.format(p.x, p.y), xytext=(p.x, p.y), xy=(p.x, p.y))
 
     # Draw the visibility graph
     for e in op_net.get_edges():
