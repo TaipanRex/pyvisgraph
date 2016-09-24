@@ -47,9 +47,11 @@ def visible_vertices(point, graph, origin=None, destination=None, init_depth=1):
     # better than list sort O(nlogn), delete O(n).
     open_edges = []
     for edge in edges:
+        # TODO: Maybe instead of doing this, set the sweep line to point, p2.x = inf, p2.y = point.y!
         for i in range(0, init_depth):
             if edge_intersect(point, points[i], edge):
                 open_edges.append(edge)
+    # TODO: What if 2 collinear edges?
     open_edges.sort(key=lambda e: point_edge_distance(point, points[0], edge))
 
     visible = []
