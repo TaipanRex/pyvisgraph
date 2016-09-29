@@ -29,8 +29,8 @@ from collections import defaultdict
 class Point:
 
     def __init__(self, x, y, polygon_id=None):
-        self.x = x
-        self.y = y
+        self.x = float(x)
+        self.y = float(y)
         self.polygon_id = polygon_id
 
     def __eq__(self, point):
@@ -42,7 +42,7 @@ class Point:
         return not self.__eq__(point)
 
     def __str__(self):
-        return "(" + str(self.x) + ", " + str(self.y) + ")"
+        return "(" + str(round(self.x, 2)) + ", " + str(round(self.y, 2)) + ")"
 
     def __hash__(self):
         '''TODO: Will this mess something up with Edge comparison? if one
@@ -50,7 +50,7 @@ class Point:
         return self.x.__hash__() + self.y.__hash__()
 
     def __repr__(self):
-        return "Point(%d, %d)" % (self.x, self.y)
+        return "Point(%.2f, %.2f)" % (self.x, self.y)
 
 
 class Edge:
