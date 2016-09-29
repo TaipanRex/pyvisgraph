@@ -23,7 +23,7 @@ SOFTWARE.
 """
 from __future__ import division
 import shapefile
-import time
+from timeit import default_timer
 import pickle
 from vis_graph.graph import Graph, Point, Edge
 from vis_graph.vis_graph import vis_graph, visible_vertices
@@ -58,35 +58,35 @@ def test_country():
     graph = Graph(polys)
     print "Graph points: {} edges: {}".format(len(graph.graph), len(graph.get_edges()))
 
-    t0 = time.clock()
+    t0 = default_timer()
     op_net = None
     #with open('visgraph.pk1', 'rb') as load:
     #    op_net = pickle.load(load)
     op_net = vis_graph(graph)
-    t1 = time.clock()
+    t1 = default_timer()
     print "Time to create visibility graph: {}".format(t1 - t0)
     print "visibility graph edges: {}".format(len(op_net.get_edges()))
     with open('visgraph.pk1', 'wb') as output:
         pickle.dump(op_net, output, -1)
     '''
-    t2 = time.clock()
+    t2 = default_timer()
     origin = Point(60.0, 0.0)
     destination = Point(40.0, 70.0)
     for v in visible_vertices(origin, graph, destination=destination):
         op_net.add_edge(Edge(origin, v))
     for v in visible_vertices(destination, graph, origin=origin):
         op_net.add_edge(Edge(destination, v))
-    t3 = time.clock()
+    t3 = default_timer()
     print "Time to update vis graph with origin/dest: {}".format(t3 - t2)
     print "visibility graph edges: {}".format(len(op_net.get_edges()))
 
-    t4 = time.clock()
+    t4 = default_timer()
     shortest = shortest_path(op_net, origin, destination)
-    t5 = time.clock()
+    t5 = default_timer()
     print "Shorest path hops: {}".format(len(shortest))
     print "Time to calculate shortest path: {}".format(t5 - t4)
     '''
-    t6 = time.clock()
+    t6 = default_timer()
     fig = plt.figure(1, figsize=(30, 30), dpi=90)
     ax = fig.add_subplot(111)
     # Draw the country
@@ -110,7 +110,7 @@ def test_country():
     #ax.annotate('Origin', xytext=(origin.x, origin.y), xy=(origin.x, origin.y))
     a#x.annotate('Destination', xytext=(destination.x, destination.y), xy=(destination.x, destination.y))
     fig.savefig("poly.png", bbox_inches='tight')
-    t7 = time.clock()
+    t7 = default_timer()
     print "Time to draw graph: {}".format(t7 - t6)
 
 if __name__ == "__main__":

@@ -24,19 +24,31 @@ SOFTWARE.
 from collections import defaultdict
 from graph import Graph, Point, Edge
 from visible_vertices import visible_vertices, edge_intersect
-import time
+from timeit import default_timer
+import sys
 
 
 def vis_graph(graph, origin=None, destination=None):
     # TODO: Only check half circle of vertices.
     # TODO: origin and destination should not be given here. it should be part
     # of 'graph'
+    points = graph.get_points()
     visibility_graph = Graph([])
-    for i, p1 in enumerate(graph.get_points()):
-        t0 = time.clock()
+    time_elapsed = 0
+    total_points = len(points)
+    points_done = 0
+    for i, p1 in enumerate(points):
+        t0 = default_timer()
         for p2 in visible_vertices(p1, graph, origin, destination):
             visibility_graph.add_edge(Edge(p1, p2))
-        t1 = time.clock()
-        print "Completed point: {} - time: {}".format(i, t1 - t0)
+        t1 = default_timer()
+        time_elapsed += t1 - t0
+        points_done += 1
+        avg_time = time_elapsed / points_done
+        rem_time = avg_time * (total_points - points_done)
+        time_stat = (points_done, rem_time, avg_time, time_elapsed)
+        status = 'Points completed: %d time[remaining: %f, avg: %f, elapsed: %f]\r'%time_stat
+        sys.stdout.write(status)
+        sys.stdout.flush()
 
     return visibility_graph
