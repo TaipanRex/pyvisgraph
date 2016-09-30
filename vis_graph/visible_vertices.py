@@ -27,7 +27,7 @@ from graph import Point, Edge, Graph
 from utils.avl import AVLTree
 
 
-def visible_vertices(point, graph, origin=None, destination=None):
+def visible_vertices(point, graph, origin=None, destination=None, visgraph=None):
     """Returns list of Points in 'graph' visible by 'point'.
 
     Args:
@@ -58,7 +58,11 @@ def visible_vertices(point, graph, origin=None, destination=None):
     visible = []
     prev_point = None
     for p in points:
-        if p == point: continue
+        if p == point:
+            continue
+        if visgraph and Edge(point, p) in visgraph[point]:
+            continue
+
         for edge in graph[p]:
             if ccw(point, p, edge.get_adjacent(p)) == -1:
                 k = EdgeKey(point, p, edge)

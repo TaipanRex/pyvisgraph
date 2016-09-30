@@ -39,7 +39,7 @@ def vis_graph(graph, origin=None, destination=None):
     points_done = 0
     for i, p1 in enumerate(points):
         t0 = default_timer()
-        for p2 in visible_vertices(p1, graph, origin, destination):
+        for p2 in visible_vertices(p1, graph, origin, destination, visibility_graph):
             visibility_graph.add_edge(Edge(p1, p2))
         t1 = default_timer()
         time_elapsed += t1 - t0
