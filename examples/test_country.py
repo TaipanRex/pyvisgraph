@@ -66,8 +66,8 @@ def test_country():
     t1 = default_timer()
     print "Time to create visibility graph: {}".format(t1 - t0)
     print "visibility graph edges: {}".format(len(op_net.get_edges()))
-    with open('visgraph.pk1', 'wb') as output:
-        pickle.dump(op_net, output, -1)
+    #with open('visgraph.pk1', 'wb') as output:
+    #    pickle.dump(op_net, output, -1)
     '''
     t2 = default_timer()
     origin = Point(60.0, 0.0)
@@ -87,7 +87,7 @@ def test_country():
     print "Time to calculate shortest path: {}".format(t5 - t4)
     '''
     t6 = default_timer()
-    fig = plt.figure(1, figsize=(30, 30), dpi=90)
+    fig = plt.figure(1, figsize=(10, 10), dpi=90)
     ax = fig.add_subplot(111)
     # Draw the country
     for poly in polys:
