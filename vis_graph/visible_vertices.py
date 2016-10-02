@@ -75,14 +75,6 @@ def visible_vertices(point, graph, origin=None, destination=None):
             else:
                 is_visible = True
 
-        # Check that visibility is not through a polygon.
-        # TODO: In Graph, add a attribute that states if a polygon is convex
-        # or not (http://bit.ly/1RsvqpO). If polygon is convex, it is simple
-        # to check if point in polygon.
-        if is_visible and p.polygon_id == point.polygon_id:
-            if p not in graph.get_adjacent_points(point):
-                is_visible = point_in_polygon(point, p, graph.get_edges())
-
         if is_visible: visible.append(p)
         for edge in graph[p]:
             if (point not in edge) and ccw(point, p, edge.get_adjacent(p)) == 1:

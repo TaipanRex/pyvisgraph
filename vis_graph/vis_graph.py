@@ -23,7 +23,7 @@ SOFTWARE.
 """
 from collections import defaultdict
 from graph import Graph, Point, Edge
-from visible_vertices import visible_vertices, edge_intersect
+from visible_vertices import visible_vertices, point_in_polygon
 from timeit import default_timer
 import sys
 
@@ -39,16 +39,27 @@ def vis_graph(graph, origin=None, destination=None):
     points_done = 0
     for i, p1 in enumerate(points):
         t0 = default_timer()
-        for p2 in visible_vertices(p1, graph, origin, destination):
-            visibility_graph.add_edge(Edge(p1, p2))
+        visible = visible_vertices(p1, graph, origin, destination)
+        for p2 in visible:
+            # Check that visibility is not through a polygon.
+            # TODO: In Graph, add a attribute that states if a polygon is convex
+            # or not (http://bit.ly/1RsvqpO). If polygon is convex, it is simple
+            # to check if point in polygon.
+            if p1.polygon_id == p2.polygon_id:
+                if p2 in graph.get_adjacent_points(p1):
+                    visibility_graph.add_edge(Edge(p1, p2))
+                elif point_in_polygon(p1, p2, graph.get_edges()):
+                    visibility_graph.add_edge(Edge(p1, p2))
         t1 = default_timer()
+
         time_elapsed += t1 - t0
         points_done += 1
         avg_time = time_elapsed / points_done
         rem_time = avg_time * (total_points - points_done)
         time_stat = (points_done, rem_time, avg_time, time_elapsed)
-        status = 'Points completed: %d time[remaining: %f, avg: %f, elapsed: %f]\r'%time_stat
+        status = 'Points completed: %d time[remaining: %f, avg: %f, elapsed: %f]        \r'%time_stat
         sys.stdout.write(status)
         sys.stdout.flush()
-
+    sys.stdout.write('\n')
+    sys.stdout.flush()
     return visibility_graph
