@@ -75,6 +75,11 @@ def visible_vertices(point, graph, origin=None, destination=None):
             else:
                 is_visible = True
 
+        # Check if visible edge is interior to its polygon
+        if is_visible and p.polygon_id == point.polygon_id:
+            if p not in graph.get_adjacent_points(point):
+                is_visible = point_in_polygon(point, p, graph.get_edges())
+
         if is_visible: visible.append(p)
         for edge in graph[p]:
             if (point not in edge) and ccw(point, p, edge.get_adjacent(p)) == 1:

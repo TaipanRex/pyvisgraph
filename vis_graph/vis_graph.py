@@ -23,15 +23,12 @@ SOFTWARE.
 """
 from collections import defaultdict
 from graph import Graph, Point, Edge
-from visible_vertices import visible_vertices, point_in_polygon
+from visible_vertices import visible_vertices
 from timeit import default_timer
 import sys
 
 
 def vis_graph(graph, origin=None, destination=None):
-    # TODO: Only check half circle of vertices.
-    # TODO: origin and destination should not be given here. it should be part
-    # of 'graph'
     points = graph.get_points()
     visibility_graph = Graph([])
     time_elapsed = 0
@@ -41,7 +38,6 @@ def vis_graph(graph, origin=None, destination=None):
         t0 = default_timer()
         for p2 in visible_vertices(p1, graph, origin, destination):
             visibility_graph.add_edge(Edge(p1, p2))
-        # Maybe instead do this on visibility_graph.get_edges() after all is built, then remove.
         t1 = default_timer()
 
         time_elapsed += t1 - t0
@@ -55,20 +51,4 @@ def vis_graph(graph, origin=None, destination=None):
     sys.stdout.write('\n')
     sys.stdout.flush()
 
-    final_graph = Graph([])
-    for i, e in enumerate(visibility_graph.get_edges()):
-        p1, p2 = e.points
-        # Check that visibility is not through a polygon.
-        # TODO: In Graph, add a attribute that states if a polygon is convex
-        # or not (http://bit.ly/1RsvqpO). If polygon is convex, it is simple
-        # to check if point in polygon.
-        if p1.polygon_id == p2.polygon_id:
-            if p2 in graph.get_adjacent_points(p1):
-                final_graph.add_edge(Edge(p1, p2))
-            elif point_in_polygon(p1, p2, graph.get_edges()):
-                final_graph.add_edge(Edge(p1, p2))
-        sys.stdout.write('PIP points completed: %d    \r' % i)
-        sys.stdout.flush()
-    sys.stdout.write('\n')
-    sys.stdout.flush()
-    return final_graph
+    return visibility_graph
