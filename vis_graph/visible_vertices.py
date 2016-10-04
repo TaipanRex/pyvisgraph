@@ -79,7 +79,7 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
         # Check if visible edge is interior to its polygon
         if is_visible and p.polygon_id == point.polygon_id:
             if p not in graph.get_adjacent_points(point):
-                is_visible = point_in_polygon(point, p, graph.get_edges())
+                is_visible = point_in_polygon(point, p, graph)
 
         if is_visible: visible.append(p)
         for edge in graph[p]:
@@ -92,17 +92,13 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
     return visible
 
 
-def point_in_polygon(p1, p2, graph_edges):
+def point_in_polygon(p1, p2, graph):
     mid_p1 = Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
     mid_p2 = Point(float('inf'), mid_p1.y)
     intersect_count = 0
     co_flag = False
     co_dir = 0
-    for edge in graph_edges:
-        # TODO: Implement a Polygon class. Pull edges from that and not
-        # from the whole graph as below.
-        if edge.points[0].polygon_id != p1.polygon_id:
-            continue
+    for edge in graph.polygons[p1.polygon_id]:
         if mid_p1.y < edge.points[0].y and mid_p1.y < edge.points[1].y:
             continue
         if mid_p1.y > edge.points[0].y and mid_p1.y > edge.points[1].y:

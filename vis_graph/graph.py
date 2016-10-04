@@ -28,7 +28,7 @@ from collections import defaultdict
 
 class Point:
 
-    def __init__(self, x, y, polygon_id=None):
+    def __init__(self, x, y, polygon_id=-1):
         self.x = float(x)
         self.y = float(y)
         self.polygon_id = polygon_id
@@ -93,22 +93,26 @@ class Graph:
 
     '''TODO: polygons is a list of polygons, what if only one polygon is added
     i.e not a list?
-    TODO: Need to store as separate polygons
-    TODO: graph should be defaultdict(set), so vis_graph can be simplified'''
+    '''
     def __init__(self, polygons):
         self.graph = defaultdict(set)
         self.edges = set()
-        self.polygon_count = 0
+        self.polygons = defaultdict(set)
+        pid = 0
         for polygon in polygons:
-            self.polygon_count += 1
-
             for i, point in enumerate(polygon):
-                point.polygon_id = self.polygon_count
+                # TODO: check if first point is last point in polygon
                 sibling_point = polygon[(i + 1) % len(polygon)]
                 edge = Edge(point, sibling_point)
+                if len(polygon) > 2:
+                    point.polygon_id = pid
+                    sibling_point.polygon_id = pid
+                    self.polygons[pid].add(edge)
                 self.graph[point].add(edge)
                 self.graph[sibling_point].add(edge)
                 self.edges.add(edge)
+            if len(polygon) > 2:
+                pid += 1
 
     def get_adjacent_points(self, point):
         return [edge.get_adjacent(point) for edge in self.graph[point]]
