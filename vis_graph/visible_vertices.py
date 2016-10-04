@@ -77,9 +77,8 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
                 is_visible = True
 
         # Check if visible edge is interior to its polygon
-        if is_visible and p.polygon_id == point.polygon_id:
-            if p not in graph.get_adjacent_points(point):
-                is_visible = point_in_polygon(point, p, graph)
+        if is_visible and p not in graph.get_adjacent_points(point):
+            is_visible = not edge_in_polygon(point, p, graph)
 
         if is_visible: visible.append(p)
         for edge in graph[p]:
@@ -92,23 +91,38 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
     return visible
 
 
-def point_in_polygon(p1, p2, graph):
-    mid_p1 = Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
-    mid_p2 = Point(float('inf'), mid_p1.y)
+def edge_in_polygon(p1, p2, graph):
+    if p1.polygon_id != p2.polygon_id:
+        return False
+    if p1.polygon_id == -1 or p2.polygon_id == -1:
+        return False
+    mid_point = Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
+    return polygon_crossing(mid_point, graph.polygons[p1.polygon_id])
+
+
+def point_in_polygon(p, graph):
+    for polygon in graph.polygons:
+        if polygon_crossing(p, graph.polygons[polygon]):
+            return True
+    return False
+
+
+def polygon_crossing(p1, poly_edges):
+    p2 = Point(float('inf'), p1.y)
     intersect_count = 0
     co_flag = False
     co_dir = 0
-    for edge in graph.polygons[p1.polygon_id]:
-        if mid_p1.y < edge.points[0].y and mid_p1.y < edge.points[1].y:
+    for edge in poly_edges:
+        if p1.y < edge.points[0].y and p1.y < edge.points[1].y:
             continue
-        if mid_p1.y > edge.points[0].y and mid_p1.y > edge.points[1].y:
+        if p1.y > edge.points[0].y and p1.y > edge.points[1].y:
             continue
         # collinear points on right side
-        co0 = ccw(mid_p1, edge.points[0], mid_p2) == 0 and edge.points[0].x > mid_p1.x
-        co1 = ccw(mid_p1, edge.points[1], mid_p2) == 0 and edge.points[1].x > mid_p1.x
+        co0 = ccw(p1, edge.points[0], p2) == 0 and edge.points[0].x > p1.x
+        co1 = ccw(p1, edge.points[1], p2) == 0 and edge.points[1].x > p1.x
         co_point = edge.points[0] if co0 else edge.points[1]
         if co0 or co1:
-            if edge.get_adjacent(co_point).y > mid_p1.y:
+            if edge.get_adjacent(co_point).y > p1.y:
                 co_dir += 1
             else:
                 co_dir -= 1
@@ -118,11 +132,11 @@ def point_in_polygon(p1, p2, graph):
                 co_dir = 0
             else:
                 co_flag = True
-        elif edge_intersect(mid_p1, mid_p2, edge):
+        elif edge_intersect(p1, p2, edge):
             intersect_count += 1
     if intersect_count % 2 == 0:
-        return True
-    return False
+        return False
+    return True
 
 
 def edge_distance(p1, p2):
