@@ -42,11 +42,9 @@ class Point:
         return not self.__eq__(point)
 
     def __str__(self):
-        return "(" + str(round(self.x, 2)) + ", " + str(round(self.y, 2)) + ")"
+        return "(%.2f, %.2f)" % (self.x, self.y)
 
     def __hash__(self):
-        '''TODO: Will this mess something up with Edge comparison? if one
-        point is x, y and other y, x?'''
         return self.x.__hash__() + self.y.__hash__()
 
     def __repr__(self):
@@ -69,7 +67,11 @@ class Edge:
 
     # TODO: This runs slow, self.points should be a set in __init__
     def __eq__(self, edge):
-        return set(self.points) == set(edge.points)
+        if self.points[0] == edge.points[0] and self.points[1] == edge.points[1]:
+            return True
+        if self.points[0] == edge.points[1] and self.points[1] == edge.points[0]:
+            return True
+        return False
 
     def __ne__(self, edge):
         return not self.__eq__(edge)
@@ -78,7 +80,7 @@ class Edge:
         return "(" + ", ".join(str(p) for p in self.points) + ")"
 
     def __repr__(self):
-        return "Edge(%s, %s)" % (self.points[0].__repr__(), self.points[1].__repr__())
+        return "Edge(%r, %r)" % (self.points[0], self.points[1])
 
     def __hash__(self):
         hash_val = 0
@@ -100,6 +102,8 @@ class Graph:
         self.polygons = defaultdict(set)
         pid = 0
         for polygon in polygons:
+            if polygon[0] == polygon[-1]:
+                polygon.pop()
             for i, point in enumerate(polygon):
                 # TODO: check if first point is last point in polygon
                 sibling_point = polygon[(i + 1) % len(polygon)]
