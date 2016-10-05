@@ -26,18 +26,45 @@ from graph import Graph, Point, Edge
 from visible_vertices import visible_vertices
 from timeit import default_timer
 import sys
+from multiprocessing import Process, Queue
 
-# TODO: refector so only one object to call?
-def vis_graph(graph, origin=None, destination=None):
-    points = graph.get_points()
+# TODO: refector so only one object to call
+# TODO: build the obstacle graph on various inputs, list of polys,
+# shapefile (given index points where coordinates are)
+def vis_graph(graph, origin=None, destination=None, workers=4):
     visibility_graph = Graph([])
+    q = Queue()
+    points = graph.get_points()
+    batchsize = int(len(points) / workers)
+    processes = []
+    for i in range(0, workers):
+        a = batchsize * i
+        if i == (workers - 1):
+            b = len(points)
+        else:
+            b = batchsize * (i + 1)
+        p = Process(target=vis_graph_worker, args=(graph, points[a:b], q))
+        processes.append(p)
+    for p in processes:
+        p.start()
+    for p in processes:
+        p.join()
+    while not q.empty():
+        for edge in q.get():
+            visibility_graph.add_edge(edge)
+    return visibility_graph
+
+
+def vis_graph_worker(graph, points_batch, q, origin=None, destination=None):
+    points = points_batch
     time_elapsed = 0
     total_points = len(points)
     points_done = 0
+    visible_edges = []
     for i, p1 in enumerate(points):
         t0 = default_timer()
         for p2 in visible_vertices(p1, graph, origin, destination, 'half'):
-            visibility_graph.add_edge(Edge(p1, p2))
+            visible_edges.append(Edge(p1, p2))
         t1 = default_timer()
 
         time_elapsed += t1 - t0
@@ -50,5 +77,4 @@ def vis_graph(graph, origin=None, destination=None):
         sys.stdout.flush()
     sys.stdout.write('\n')
     sys.stdout.flush()
-
-    return visibility_graph
+    q.put(visible_edges)
