@@ -26,37 +26,29 @@ from graph import Graph, Point, Edge
 from visible_vertices import visible_vertices
 from timeit import default_timer
 import sys
-from multiprocessing import Process, Queue
+from multiprocessing import Pool
 
 # TODO: refector so only one object to call
 # TODO: build the obstacle graph on various inputs, list of polys,
 # shapefile (given index points where coordinates are)
-def vis_graph(graph, origin=None, destination=None, workers=4):
+def vis_graph(graph, origin=None, destination=None, workers=2):
     visibility_graph = Graph([])
-    q = Queue()
     points = graph.get_points()
-    batchsize = int(len(points) / workers)
-    processes = []
-    for i in range(0, workers):
-        a = batchsize * i
-        if i == (workers - 1):
-            b = len(points)
-        else:
-            b = batchsize * (i + 1)
-        p = Process(target=vis_graph_worker, args=(graph, points[a:b], q))
-        processes.append(p)
-    for p in processes:
-        p.start()
-    for p in processes:
-        p.join()
-    while not q.empty():
-        for edge in q.get():
+    n = int(len(points) / workers)
+    batches = [(graph, points[i:i + n], origin, destination) for i in xrange(0, len(points), n)]
+    pool = Pool(workers)
+    result = pool.map_async(vis_graph_worker_wrap, batches)
+    for job in result.get():
+        for edge in job:
             visibility_graph.add_edge(edge)
     return visibility_graph
 
+def vis_graph_worker_wrap(args):
+    return vis_graph_worker(*args)
 
-def vis_graph_worker(graph, points_batch, q, origin=None, destination=None):
-    points = points_batch
+# TODO: keep vis_graph as it was, then make a separate worker and processing
+# function.
+def vis_graph_worker(graph, points, origin=None, destination=None):
     time_elapsed = 0
     total_points = len(points)
     points_done = 0
@@ -77,4 +69,4 @@ def vis_graph_worker(graph, points_batch, q, origin=None, destination=None):
         sys.stdout.flush()
     sys.stdout.write('\n')
     sys.stdout.flush()
-    q.put(visible_edges)
+    return visible_edges
