@@ -21,52 +21,80 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from collections import defaultdict
-from graph import Graph, Point, Edge
+import cPickle as pickle
+from graph import Graph, Edge
 from visible_vertices import visible_vertices
 from timeit import default_timer
 import sys
+from utils.shortest_path import shortest_path
 from multiprocessing import Pool
 
-# TODO: refector so only one object to call
-# TODO: build the obstacle graph on various inputs, list of polys,
-# shapefile (given index points where coordinates are)
-def vis_graph(graph, origin=None, destination=None, workers=2):
-    visibility_graph = Graph([])
-    points = graph.get_points()
-    n = int(len(points) / workers)
-    batches = [(graph, points[i:i + n], origin, destination) for i in xrange(0, len(points), n)]
-    pool = Pool(workers)
-    result = pool.map_async(vis_graph_worker_wrap, batches)
-    for job in result.get():
-        for edge in job:
-            visibility_graph.add_edge(edge)
-    return visibility_graph
 
-def vis_graph_worker_wrap(args):
-    return vis_graph_worker(*args)
+# TODO: add update_visgraph(point), so you can to shortest([p1,p2,p3], point)
+class VisGraph(object):
 
-# TODO: keep vis_graph as it was, then make a separate worker and processing
-# function.
-def vis_graph_worker(graph, points, origin=None, destination=None):
-    time_elapsed = 0
+    def __init__(self):
+        self.graph = None
+        self.visgraph = None
+
+    def load(self, filename):
+        with open(filename, 'rb') as load:
+            self.graph, self.visgraph = pickle.load(load)
+
+    def save(self, filename):
+        with open(filename, 'wb') as output:
+            pickle.dump((self.graph, self.visgraph), output, -1)
+
+    # TODO: build the obstacle graph on various inputs, list of polys,
+    # shapefile (given index points where coordinates are)
+    def build(self, input, workers=1):
+        self.graph = Graph(input)
+        self.visgraph = Graph([])
+        print " " + "[Done][Rem.][Avg t] " * workers
+        if workers == 1:
+            for edge in _vis_graph(self.graph, self.graph.get_points(), 0):
+                self.visgraph.add_edge(edge)
+            print ""
+            return
+
+        points = self.graph.get_points()
+        # Perhaps better to use smaller batch size, if one process is slower..
+        batch_size = int(len(points) / workers)
+        point_batches = [(self.graph, points[i:i + batch_size], i/batch_size)
+                         for i in xrange(0, len(points), batch_size)]
+        pool = Pool(workers)
+        results = pool.map_async(_vis_graph_wrapper, point_batches)
+        for result in results.get():
+            for edge in result:
+                self.visgraph.add_edge(edge)
+        print ""
+
+    def shortest_path(self, origin, destination):
+        updated_visgraph = Graph([])
+        updated_visgraph.graph = self.visgraph.graph.copy()
+        for p in visible_vertices(origin, self.graph, destination=destination):
+            updated_visgraph.add_edge(Edge(origin, p))
+        for p in visible_vertices(destination, self.graph, origin=origin):
+            updated_visgraph.add_edge(Edge(destination, p))
+        return shortest_path(updated_visgraph, origin, destination)
+
+
+def _vis_graph_wrapper(args):
+    return _vis_graph(*args)
+
+
+def _vis_graph(graph, points, worker):
     total_points = len(points)
     points_done = 0
     visible_edges = []
+    t0 = default_timer()
     for i, p1 in enumerate(points):
-        t0 = default_timer()
-        for p2 in visible_vertices(p1, graph, origin, destination, 'half'):
+        for p2 in visible_vertices(p1, graph, scan='half'):
             visible_edges.append(Edge(p1, p2))
-        t1 = default_timer()
-
-        time_elapsed += t1 - t0
         points_done += 1
-        avg_time = time_elapsed / points_done
-        rem_time = avg_time * (total_points - points_done)
-        time_stat = (points_done, rem_time, avg_time, time_elapsed)
-        status = 'Points completed: %d time[remaining: %f, avg: %f, elapsed: %f]        \r'%time_stat
-        sys.stdout.write(status)
+        avg_time = round((default_timer() - t0) / points_done, 3)
+        time_stat = (points_done, total_points-points_done, avg_time)
+        status = '\r\033[' + str(21*worker) + 'C[{:4}][{:4}][{:5.3f}] \r'
+        sys.stdout.write(status.format(*time_stat))
         sys.stdout.flush()
-    sys.stdout.write('\n')
-    sys.stdout.flush()
     return visible_edges
