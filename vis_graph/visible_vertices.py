@@ -23,7 +23,7 @@ SOFTWARE.
 """
 from __future__ import division
 from math import pi, sqrt, atan, acos
-from graph import Point, Edge, Graph
+from graph import Point
 from utils.avl import AVLTree
 
 
@@ -51,7 +51,7 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
             continue
         if edge_intersect(point, point_inf, e):
             i = intersect_point(point, point_inf, e)
-            if e.points[0].y > i.y or e.points[1].y > i.y:
+            if e.p1.y > i.y or e.p2.y > i.y:
                 k = EdgeKey(point, point_inf, e)
                 open_edges.insert(k)
 
@@ -113,14 +113,14 @@ def polygon_crossing(p1, poly_edges):
     co_flag = False
     co_dir = 0
     for edge in poly_edges:
-        if p1.y < edge.points[0].y and p1.y < edge.points[1].y:
+        if p1.y < edge.p1.y and p1.y < edge.p2.y:
             continue
-        if p1.y > edge.points[0].y and p1.y > edge.points[1].y:
+        if p1.y > edge.p1.y and p1.y > edge.p2.y:
             continue
         # collinear points on right side
-        co0 = ccw(p1, edge.points[0], p2) == 0 and edge.points[0].x > p1.x
-        co1 = ccw(p1, edge.points[1], p2) == 0 and edge.points[1].x > p1.x
-        co_point = edge.points[0] if co0 else edge.points[1]
+        co0 = ccw(p1, edge.p1, p2) == 0 and edge.p1.x > p1.x
+        co1 = ccw(p1, edge.p2, p2) == 0 and edge.p2.x > p1.x
+        co_point = edge.p1 if co0 else edge.p2
         if co0 or co1:
             if edge.get_adjacent(co_point).y > p1.y:
                 co_dir += 1
@@ -155,28 +155,26 @@ def point_edge_distance(p1, p2, edge):
 
 
 def intersect_point(p1, p2, edge):
-    edge_p1, edge_p2 = edge.points
-
-    if edge_p1.x == edge_p2.x:
+    if edge.p1.x == edge.p2.x:
         if p1.x == p2.x:
             return None
         pslope = (p1.y - p2.y) / (p1.x - p2.x)
-        intersect_x = edge_p1.x
+        intersect_x = edge.p1.x
         intersect_y = pslope * (intersect_x - p1.x) + p1.y
         return Point(intersect_x, intersect_y)
 
     if p1.x == p2.x:
-        eslope = (edge_p1.y - edge_p2.y) / (edge_p1.x - edge_p2.x)
+        eslope = (edge.p1.y - edge.p2.y) / (edge.p1.x - edge.p2.x)
         intersect_x = p1.x
-        intersect_y = eslope * (intersect_x - edge_p1.x) + edge_p1.y
+        intersect_y = eslope * (intersect_x - edge.p1.x) + edge.p1.y
         return Point(intersect_x, intersect_y)
 
     pslope = (p1.y - p2.y) / (p1.x - p2.x)
-    eslope = (edge_p1.y - edge_p2.y) / (edge_p1.x - edge_p2.x)
+    eslope = (edge.p1.y - edge.p2.y) / (edge.p1.x - edge.p2.x)
     if eslope == pslope:
         return None
-    intersect_x = (eslope * edge_p1.x - pslope * p1.x + p1.y - edge_p1.y) / (eslope - pslope)
-    intersect_y = eslope * (intersect_x - edge_p1.x) + edge_p1.y
+    intersect_x = (eslope * edge.p1.x - pslope * p1.x + p1.y - edge.p1.y) / (eslope - pslope)
+    intersect_y = eslope * (intersect_x - edge.p1.x) + edge.p1.y
     return Point(intersect_x, intersect_y)
 
 
@@ -220,7 +218,8 @@ def edge_intersect(A, B, edge):
     """
     # TODO: May be an issue with colinerity or intersections at vertex points.
     # http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
-    C, D = edge.points
+    C = edge.p1
+    D = edge.p2
     return ccw(A, C, D) != ccw(B, C, D) and ccw(A, B, C) != ccw(A, B, D)
 
 

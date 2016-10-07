@@ -54,22 +54,21 @@ class Point:
 class Edge:
 
     def __init__(self, point1, point2):
-        self.points = (point1, point2)
+        self.p1 = point1
+        self.p2 = point2
 
     def get_adjacent(self, point):
-        point_a, point_b = self.points
-        if point == point_a:
-            return point_b
-        return point_a
+        if point == self.p1:
+            return self.p2
+        return self.p1
 
     def __contains__(self, point):
-        return point in self.points
+        return self.p1 == point or self.p2 == point
 
-    # TODO: This runs slow, self.points should be a set in __init__
     def __eq__(self, edge):
-        if self.points[0] == edge.points[0] and self.points[1] == edge.points[1]:
+        if self.p1 == edge.p1 and self.p2 == edge.p2:
             return True
-        if self.points[0] == edge.points[1] and self.points[1] == edge.points[0]:
+        if self.p1 == edge.p2 and self.p2 == edge.p1:
             return True
         return False
 
@@ -77,16 +76,13 @@ class Edge:
         return not self.__eq__(edge)
 
     def __str__(self):
-        return "(" + ", ".join(str(p) for p in self.points) + ")"
+        return "({}, {})".format(self.p1, self.p2)
 
     def __repr__(self):
-        return "Edge(%r, %r)" % (self.points[0], self.points[1])
+        return "Edge({r}, {r})".format(self.p1, self.p2)
 
     def __hash__(self):
-        hash_val = 0
-        for point in self.points:
-            hash_val += point.__hash__()
-        return hash_val
+        return self.p1.__hash__() + self.p2.__hash__()
 
 
 ''' TODO: Change to __addatrr__ (I think), so that doing graph[p].add(edges)
@@ -129,8 +125,8 @@ class Graph:
         return self.edges
 
     def add_edge(self, edge):
-        self.graph[edge.points[0]].add(edge)
-        self.graph[edge.points[1]].add(edge)
+        self.graph[edge.p1].add(edge)
+        self.graph[edge.p2].add(edge)
         self.edges.add(edge)
 
     def __getitem__(self, point):
