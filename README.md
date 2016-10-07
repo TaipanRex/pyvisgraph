@@ -34,6 +34,20 @@ simple polygons:
 >>> print shortest
 [Point(1.50, 0.00), Point(3.00, 1.00), Point(4.00, 6.00)]
 ```
+Once the visibility graph is built, it can be saved and subsequently loaded.
+This is useful for large graphs where build time is long. `cPickle` is used
+for saving and loading.
+```
+>>> g.save('graph.pk1')
+>>> g2 = VisGraph()
+>>> g2.load('graph.pk1')
+```
+For obstacles with a large number of points, Pyvisgraph can take advantage of
+processors with multiple cores using the `multiprocessing` module. Simply
+add the number of workers (processes) to the `build` method:
+```
+>>> g.build(polys, workers=4)
+```
 For more information about the implementation, see these series of articles:
 * [Distance Tables Part 1: Defining the Problem](https://taipanrex.github.io/2016/09/17/Distance-Tables-Part-1-Defining-the-Problem.html)
 * More to come...
