@@ -26,7 +26,8 @@ from math import sqrt
 from collections import defaultdict
 
 
-class Point:
+class Point(object):
+    __slots__ = ('x', 'y', 'polygon_id')
 
     def __init__(self, x, y, polygon_id=-1):
         self.x = float(x)
@@ -51,7 +52,8 @@ class Point:
         return "Point(%.2f, %.2f)" % (self.x, self.y)
 
 
-class Edge:
+class Edge(object):
+    __slots__ = ('p1', 'p2')
 
     def __init__(self, point1, point2):
         self.p1 = point1
@@ -87,7 +89,7 @@ class Edge:
 
 ''' TODO: Change to __addatrr__ (I think), so that doing graph[p].add(edges)
     also adds it to the edges set.'''
-class Graph:
+class Graph(object):
 
     '''TODO: polygons is a list of polygons, what if only one polygon is added
     i.e not a list?
@@ -101,7 +103,6 @@ class Graph:
             if polygon[0] == polygon[-1]:
                 polygon.pop()
             for i, point in enumerate(polygon):
-                # TODO: check if first point is last point in polygon
                 sibling_point = polygon[(i + 1) % len(polygon)]
                 edge = Edge(point, sibling_point)
                 if len(polygon) > 2:
