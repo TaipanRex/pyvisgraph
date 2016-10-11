@@ -24,7 +24,6 @@ SOFTWARE.
 from __future__ import division
 from math import pi, sqrt, atan, acos
 from graph import Point
-from utils.avl import AVLTree
 
 
 def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
@@ -44,16 +43,16 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
 
     # Initialize open_edges list with any intersecting edges from point to
     # the first point in angle sorted point list.
-    open_edges = AVLTree()
+    open_edges = []
     point_inf = Point(10000.0, point.y)
     for e in edges:
         if point in e:
             continue
         if edge_intersect(point, point_inf, e):
-            i = intersect_point(point, point_inf, e)
-            if e.p1.y > i.y or e.p2.y > i.y:
+            ip = intersect_point(point, point_inf, e)
+            if e.p1.y > ip.y or e.p2.y > ip.y:
                 k = EdgeKey(point, point_inf, e)
-                open_edges.insert(k)
+                insort(open_edges, k)
 
     visible = []
     prev_point = None
@@ -61,15 +60,20 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
         if p == point: continue
         if scan == 'half' and angle(point, p) > pi: break
 
-        for edge in graph[p]:
-            if ccw(point, p, edge.get_adjacent(p)) == -1:
-                k = EdgeKey(point, p, edge)
-                open_edges.delete(k)
+        if open_edges:
+            for edge in graph[p]:
+                if ccw(point, p, edge.get_adjacent(p)) == -1:
+                    k = EdgeKey(point, p, edge)
+                    index = bisect(open_edges, k) - 1
+                    if open_edges[index] == k:
+                        del open_edges[index]
 
         # Check if p is visible
         is_visible = False
-        smallest_edge = open_edges.smallest()
-        if not smallest_edge or edge_distance(point, p) <= point_edge_distance(point, p, smallest_edge.edge):
+        smallest_edge = None
+        if len(open_edges) > 0:
+            smallest_edge = open_edges[0].edge
+        if not smallest_edge or edge_distance(point, p) <= point_edge_distance(point, p, smallest_edge):
             if prev_point and angle(point, p) == angle(point, prev_point):
                 if edge_distance(point, p) < edge_distance(point, prev_point):
                     is_visible = True
@@ -84,10 +88,9 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
         for edge in graph[p]:
             if (point not in edge) and ccw(point, p, edge.get_adjacent(p)) == 1:
                 k = EdgeKey(point, p, edge)
-                open_edges.insert(k)
+                insort(open_edges, k)
 
         prev_point = p
-
     return visible
 
 
@@ -222,6 +225,27 @@ def edge_intersect(A, B, edge):
     D = edge.p2
     return ccw(A, C, D) != ccw(B, C, D) and ccw(A, B, C) != ccw(A, B, D)
 
+def insort(a, x, lo=0, hi=None):
+    if lo < 0:
+        raise ValueError('lo must be non-negative')
+    if hi is None:
+        hi = len(a)
+    while lo < hi:
+        mid = (lo+hi)//2
+        if a[mid] > x: hi = mid
+        else: lo = mid+1
+    a.insert(lo, x)
+
+def bisect(a, x, lo=0, hi=None):
+    if lo < 0:
+        raise ValueError('lo must be non-negative')
+    if hi is None:
+        hi = len(a)
+    while lo < hi:
+        mid = (lo+hi)//2
+        if a[mid] > x: hi = mid
+        else: lo = mid+1
+    return lo
 
 class EdgeKey:
     def __init__(self, p1, p2, edge):
@@ -229,6 +253,9 @@ class EdgeKey:
         self.p2 = p2
         self.edge = edge
 
+    # TODO: switch self other. Bisect is the item you insert compared to what
+    # is in there. Then can use C implementation of bisect. Check if
+    # open_edges exceeds 1000 edges, then it might be better to use SortedContainers
     def __cmp__(self, other):
         if self.edge == other.edge:
             return 0
@@ -247,7 +274,18 @@ class EdgeKey:
         other_dist = point_edge_distance(other.p1, other.p2, other.edge)
         if self_dist > other_dist:
             return 1
-        return -1
+        if self_dist < other_dist:
+            return -1
+        elif self_dist == other_dist:
+            if self.edge.p1 == other.edge.p1 or self.edge.p1 == other.edge.p2:
+                same_point = self.edge.p1
+            elif self.edge.p2 == other.edge.p1 or self.edge.p2 == other.edge.p2:
+                same_point = self.edge.p2
+            aslf = angle2(other.p1, other.p2, self.edge.get_adjacent(same_point))
+            aot = angle2(other.p1, other.p2, other.edge.get_adjacent(same_point))
+            if aot < aslf:
+                return 1
+            return -1
 
     def __repr__(self):
         reprstring = (self.__class__.__name__, self.edge, self.p1, self.p2)
