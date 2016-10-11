@@ -81,26 +81,21 @@ class Edge(object):
         return "({}, {})".format(self.p1, self.p2)
 
     def __repr__(self):
-        return "Edge({r}, {r})".format(self.p1, self.p2)
+        return "Edge({!r}, {!r})".format(self.p1, self.p2)
 
     def __hash__(self):
         return self.p1.__hash__() + self.p2.__hash__()
 
 
-''' TODO: Change to __addatrr__ (I think), so that doing graph[p].add(edges)
-    also adds it to the edges set.'''
 class Graph(object):
 
-    '''TODO: polygons is a list of polygons, what if only one polygon is added
-    i.e not a list?
-    '''
     def __init__(self, polygons):
         self.graph = defaultdict(set)
         self.edges = set()
         self.polygons = defaultdict(set)
         pid = 0
         for polygon in polygons:
-            if polygon[0] == polygon[-1]:
+            if polygon[0] == polygon[-1] and len(polygon) > 1:
                 polygon.pop()
             for i, point in enumerate(polygon):
                 sibling_point = polygon[(i + 1) % len(polygon)]
@@ -109,9 +104,7 @@ class Graph(object):
                     point.polygon_id = pid
                     sibling_point.polygon_id = pid
                     self.polygons[pid].add(edge)
-                self.graph[point].add(edge)
-                self.graph[sibling_point].add(edge)
-                self.edges.add(edge)
+                self.add_edge(edge)
             if len(polygon) > 2:
                 pid += 1
 
