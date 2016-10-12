@@ -27,13 +27,13 @@ from graph import Point
 
 
 def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
-    """Returns list of Points in 'graph' visible by 'point'.
+    """Returns list of Points in graph visible by point.
 
-    Args:
-        point: Point to check visibility from.
-        graph: Graph to check visibility against.
-        origin: A optional origin/starting Point included in visibility test
-        destination: A optional destination Point included in visibility test
+    If origin and/or destination Points are given, these will also be checked
+    for visibility. scan 'full' will check for visibility against all points in
+    graph, 'half' will check for visibility against half the points. This saves
+    running time when building a complete visibility graph, as the points
+    that are not checked will eventually be 'point'.
     """
     edges = graph.get_edges()
     points = graph.get_points()
@@ -41,13 +41,12 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
     if destination: points.append(destination)
     points.sort(key=lambda p: (angle(point, p), edge_distance(point, p)))
 
-    # Initialize open_edges list with any intersecting edges from point to
-    # the first point in angle sorted point list.
+    # Initialize open_edges with any intersecting edges on the half line from
+    # point along the positive x-axis
     open_edges = []
-    point_inf = Point(10000.0, point.y)
+    point_inf = Point(float('inf'), point.y)
     for e in edges:
-        if point in e:
-            continue
+        if point in e: continue
         if edge_intersect(point, point_inf, e):
             ip = intersect_point(point, point_inf, e)
             if e.p1.y > ip.y or e.p2.y > ip.y:
@@ -60,6 +59,7 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
         if p == point: continue
         if scan == 'half' and angle(point, p) > pi: break
 
+        # Remove clock wise edges incident on p
         if open_edges:
             for edge in graph[p]:
                 if ccw(point, p, edge.get_adjacent(p)) == -1:
@@ -68,7 +68,7 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
                     if open_edges[index] == k:
                         del open_edges[index]
 
-        # Check if p is visible
+        # Check if p is visible from point
         is_visible = False
         smallest_edge = None
         if len(open_edges) > 0:
@@ -80,11 +80,13 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
             else:
                 is_visible = True
 
-        # Check if visible edge is interior to its polygon
+        # Check if the visible edge is interior to its polygon
         if is_visible and p not in graph.get_adjacent_points(point):
             is_visible = not edge_in_polygon(point, p, graph)
 
         if is_visible: visible.append(p)
+
+        # Add counter clock wise edges incident on p to open_edges
         for edge in graph[p]:
             if (point not in edge) and ccw(point, p, edge.get_adjacent(p)) == 1:
                 k = EdgeKey(point, p, edge)
@@ -94,23 +96,13 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
     return visible
 
 
-def edge_in_polygon(p1, p2, graph):
-    if p1.polygon_id != p2.polygon_id:
-        return False
-    if p1.polygon_id == -1 or p2.polygon_id == -1:
-        return False
-    mid_point = Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
-    return polygon_crossing(mid_point, graph.polygons[p1.polygon_id])
-
-
-def point_in_polygon(p, graph):
-    for polygon in graph.polygons:
-        if polygon_crossing(p, graph.polygons[polygon]):
-            return True
-    return False
-
-
 def polygon_crossing(p1, poly_edges):
+    """Returns True if Point p1 is internal to the polygon
+
+    The polygon is defined by the Edges in poly_edges. Uses crossings
+    algorithm and takes into account edges that are collinear to p1.
+    """
+
     p2 = Point(float('inf'), p1.y)
     intersect_count = 0
     co_flag = False
@@ -142,22 +134,32 @@ def polygon_crossing(p1, poly_edges):
     return True
 
 
+def edge_in_polygon(p1, p2, graph):
+    if p1.polygon_id != p2.polygon_id:
+        return False
+    if p1.polygon_id == -1 or p2.polygon_id == -1:
+        return False
+    mid_point = Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
+    return polygon_crossing(mid_point, graph.polygons[p1.polygon_id])
+
+
+# TODO: Check if point is in polygon bounding box first
+def point_in_polygon(p, graph):
+    for polygon in graph.polygons:
+        if polygon_crossing(p, graph.polygons[polygon]):
+            return True
+    return False
+
+
 def edge_distance(p1, p2):
     """Return the Euclidean distance between two Points."""
+
     return sqrt((p2.x - p1.x)**2 + (p2.y - p1.y)**2)
 
 
-def point_edge_distance(p1, p2, edge):
-    """The line going from point1 to point2, intersects edge before reaching
-    point2. Return the distance from point1 to this interect point.
-    """
-    intersect_p = intersect_point(p1, p2, edge)
-    if intersect_p is not None:
-        return edge_distance(p1, intersect_p)
-    return 0
-
-
 def intersect_point(p1, p2, edge):
+    """Return intersect Point where the edge from p1, p2 intersects edge"""
+
     if edge.p1.x == edge.p2.x:
         if p1.x == p2.x:
             return None
@@ -181,8 +183,27 @@ def intersect_point(p1, p2, edge):
     return Point(intersect_x, intersect_y)
 
 
+def point_edge_distance(p1, p2, edge):
+    """Return the Eucledian distance from p1 to intersect point with edge.
+
+    The line going from p1 to p2 intersects edge before reaching p2.
+    """
+
+    ip = intersect_point(p1, p2, edge)
+    if ip is not None:
+        return edge_distance(p1, ip)
+    return 0
+
+
 def angle(center, point):
-    """Return the angle of 'point' from the 'center' of the radian circle."""
+    """Return the angle (radian) of point from center of the radian circle.
+
+     ------p
+     |   /
+     |  /
+    c|a/
+    """
+
     dx = point.x - center.x
     dy = point.y - center.y
     if dx == 0:
@@ -209,38 +230,38 @@ def angle2(point_a, point_b, point_c):
 
 
 def ccw(A, B, C):
+    """Return 1 if counter clockwise, -1 if clock wise, 0 if collinear """
+
     area = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x)
-    if area > 0: return 1  # ccw
-    if area < 0: return -1  # cw
+    if area > 0: return 1  # counter clock wise
+    if area < 0: return -1  # clock wise
     return 0  # collinear
 
 
 def edge_intersect(A, B, edge):
-    """Return True if 'edge' is interesected by the line going through 'A' and
-    'B', False otherwise. If edge contains either 'A' or 'B', return False.
+    """Return True if edge from A, B interects edge.
+
+    If edge contains either 'A' or 'B', return False.
     """
+
     # TODO: May be an issue with colinerity or intersections at vertex points.
     # http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
     C = edge.p1
     D = edge.p2
     return ccw(A, C, D) != ccw(B, C, D) and ccw(A, B, C) != ccw(A, B, D)
 
-def insort(a, x, lo=0, hi=None):
-    if lo < 0:
-        raise ValueError('lo must be non-negative')
-    if hi is None:
-        hi = len(a)
+def insort(a, x):
+    lo = 0
+    hi = len(a)
     while lo < hi:
         mid = (lo+hi)//2
         if a[mid] > x: hi = mid
         else: lo = mid+1
     a.insert(lo, x)
 
-def bisect(a, x, lo=0, hi=None):
-    if lo < 0:
-        raise ValueError('lo must be non-negative')
-    if hi is None:
-        hi = len(a)
+def bisect(a, x):
+    lo = 0
+    hi = len(a)
     while lo < hi:
         mid = (lo+hi)//2
         if a[mid] > x: hi = mid
@@ -253,9 +274,6 @@ class EdgeKey:
         self.p2 = p2
         self.edge = edge
 
-    # TODO: switch self other. Bisect is the item you insert compared to what
-    # is in there. Then can use C implementation of bisect. Check if
-    # open_edges exceeds 1000 edges, then it might be better to use SortedContainers
     def __cmp__(self, other):
         if self.edge == other.edge:
             return 0
@@ -269,7 +287,7 @@ class EdgeKey:
         # if no intersect with self, self > other
         if not edge_intersect(other.p1, other.p2, self.edge):
             return 1
-        # last case is where we need to recalculate distance for me, other is edge_distance p1,p2
+        # if distance is equal, need to check angle
         self_dist = point_edge_distance(other.p1, other.p2, self.edge)
         other_dist = point_edge_distance(other.p1, other.p2, other.edge)
         if self_dist > other_dist:
