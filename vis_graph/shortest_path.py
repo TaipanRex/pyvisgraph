@@ -21,9 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from vis_graph.graph import Point, Edge, Graph
-from vis_graph.visible_vertices import edge_distance
-from utils.priority_dict import priority_dict
+from heapq import heapify, heappush, heappop
+from visible_vertices import edge_distance
 
 
 def dijkstra(graph, origin, destination=None):
@@ -57,3 +56,68 @@ def shortest_path(graph, origin, destination):
         destination = P[destination]
     path.reverse()
     return path
+
+
+class priority_dict(dict):
+    """Dictionary that can be used as a priority queue.
+
+    Keys of the dictionary are items to be put into the queue, and values
+    are their respective priorities. All dictionary methods work as expected.
+    The advantage over a standard heapq-based priority queue is that priorities
+    of items can be efficiently updated (amortized O(1)) using code as
+    'thedict[item] = new_priority.'
+
+    Note that this is a modified version of
+    https://gist.github.com/matteodellamico/4451520 where sorted_iter() has
+    been replaced with the destructive sorted iterator __iter__ from
+    https://gist.github.com/anonymous/4435950
+    """
+    def __init__(self, *args, **kwargs):
+        super(priority_dict, self).__init__(*args, **kwargs)
+        self._rebuild_heap()
+
+    def _rebuild_heap(self):
+        self._heap = [(v, k) for k, v in self.iteritems()]
+        heapify(self._heap)
+
+    def smallest(self):
+        heap = self._heap
+        v, k = heap[0]
+        while k not in self or self[k] != v:
+            heappop(heap)
+            v, k = heap[0]
+        return k
+
+    def pop_smallest(self):
+        heap = self._heap
+        v, k = heappop(heap)
+        while k not in self or self[k] != v:
+            v, k = heappop(heap)
+        del self[k]
+        return k
+
+    def __setitem__(self, key, val):
+        super(priority_dict, self).__setitem__(key, val)
+
+        if len(self._heap) < 2 * len(self):
+            heappush(self._heap, (val, key))
+        else:
+            self._rebuild_heap()
+
+    def setdefault(self, key, val):
+        if key not in self:
+            self[key] = val
+            return val
+        return self[key]
+
+    def update(self, *args, **kwargs):
+        super(priority_dict, self).update(*args, **kwargs)
+        self._rebuild_heap()
+
+    def __iter__(self):
+        def iterfn():
+            while len(self) > 0:
+                x = self.smallest()
+                yield x
+                del self[x]
+        return iterfn()
