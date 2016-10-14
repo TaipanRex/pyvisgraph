@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from __future__ import division
-from math import sqrt
 from collections import defaultdict
 
 
@@ -111,7 +110,6 @@ class Graph(object):
     def get_adjacent_points(self, point):
         return [edge.get_adjacent(point) for edge in self.graph[point]]
 
-    ''' should return a generator/iterator? or does it already? '''
     def get_points(self):
         return self.graph.keys()
 
@@ -122,6 +120,13 @@ class Graph(object):
         self.graph[edge.p1].add(edge)
         self.graph[edge.p2].add(edge)
         self.edges.add(edge)
+
+    def __contains__(self, item):
+        if isinstance(item, Point):
+            return item in self.graph
+        if isinstance(item, Edge):
+            return item in self.edges
+        return False
 
     def __getitem__(self, point):
         if point in self.graph:
