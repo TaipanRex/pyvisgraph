@@ -66,7 +66,7 @@ class VisGraph(object):
         if status: print " " + "[Done][Rem.][Avg t] " * workers
 
         if workers == 1:
-            for edge in _vis_graph(self.graph, self.graph.get_points(), 0):
+            for edge in _vis_graph(self.graph, self.graph.get_points(), 0, status):
                 self.visgraph.add_edge(edge)
             if status: print ""
             return None
