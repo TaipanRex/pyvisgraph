@@ -101,8 +101,8 @@ class VisGraph(object):
         and destination visibility if not computed before.
         """
 
-        origin_exists = origin in self.graph
-        dest_exists = destination in self.graph
+        origin_exists = origin in self.visgraph
+        dest_exists = destination in self.visgraph
         if origin_exists and dest_exists:
             return shortest_path(self.visgraph, origin, destination)
         orgn = None if origin_exists else origin
