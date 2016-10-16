@@ -147,8 +147,27 @@ def edge_in_polygon(p1, p2, graph):
 def point_in_polygon(p, graph):
     for polygon in graph.polygons:
         if polygon_crossing(p, graph.polygons[polygon]):
-            return True
-    return False
+            return polygon
+    return -1
+
+
+def closest_point(p, graph, polygon_id):
+    polygon_edges = graph.polygons[polygon_id]
+    smallest_dist = None
+    smallest_point = None
+    for i, e in enumerate(polygon_edges):
+        u = ((p.x-e.p1.x)*(e.p2.x-e.p1.x)+(p.y-e.p1.y)*(e.p2.y-e.p1.y))/((e.p2.x - e.p1.x)**2 + (e.p2.y - e.p1.y)**2)
+        pu = Point(e.p1.x + u*(e.p2.x - e.p1.x), e.p1.y + u*(e.p2.y- e.p1.y))
+        pc = pu
+        if u < 0:
+            pc = e.p1
+        elif u > 1:
+            pc = e.p2
+        d = edge_distance(p, pc)
+        if i == 0 or d < smallest_dist:
+            smallest_dist = d
+            smallest_point = pc
+    return smallest_point
 
 
 def edge_distance(p1, p2):
