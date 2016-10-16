@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from __future__ import division
 from collections import defaultdict
 
 
@@ -34,9 +33,7 @@ class Point(object):
         self.polygon_id = polygon_id
 
     def __eq__(self, point):
-        if point is None:
-            return False
-        return self.x == point.x and self.y == point.y
+        return point and self.x == point.x and self.y == point.y
 
     def __ne__(self, point):
         return not self.__eq__(point)
@@ -45,7 +42,7 @@ class Point(object):
         return "(%.2f, %.2f)" % (self.x, self.y)
 
     def __hash__(self):
-        return self.x.__hash__() + self.y.__hash__()
+        return self.x.__hash__() ^ self.y.__hash__()
 
     def __repr__(self):
         return "Point(%.2f, %.2f)" % (self.x, self.y)
@@ -83,10 +80,25 @@ class Edge(object):
         return "Edge({!r}, {!r})".format(self.p1, self.p2)
 
     def __hash__(self):
-        return self.p1.__hash__() + self.p2.__hash__()
+        return self.p1.__hash__() ^ self.p2.__hash__()
 
 
 class Graph(object):
+    """
+    A Graph is represented by a dict where the keys are Points in the Graph
+    and the dict values are sets containing Edges incident on each Point.
+    A separate set *edges* contains all Edges in the graph.
+
+    The input must be a list of polygons, where each polygon is a list of
+    in-order (clockwise or counter clockwise) Points. If only one polygon,
+    it must still be a list in a list, i.e. [[Point(0,0), Point(2,0),
+    Point(2,1)]].
+
+    *polygons* dictionary: key is a integer polygon ID and values are the
+    edges that make up the polygon. Note only polygons with 3 or more Points
+    will be classified as a polygon. Non-polygons like just one Point will be
+    given a polygon ID of -1 and not maintained in the dict.
+    """
 
     def __init__(self, polygons):
         self.graph = defaultdict(set)
