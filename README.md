@@ -1,7 +1,7 @@
 # Pyvisgraph - Python Visibility Graph
 
 [![MIT License](https://img.shields.io/badge/license-MIT-007EC7.svg?style=flat)](/LICENSE.txt)
-![PyPI](https://img.shields.io/badge/pypi-v0.1-brightgreen.svg?style=flat)
+[![PyPI](https://img.shields.io/badge/pypi-v0.1-brightgreen.svg?style=flat)](https://pypi.python.org/pypi/pyvisgraph)
 
 Given a set of simple obstacle polygons, build a visibility graph and find
 the shortest path between two points.
@@ -57,8 +57,8 @@ Pyvisgraph also has some useful helper functions:
 
 ## Performance
 Using a shapefile representing world shorelines, Pyvisgraph has the following
-performance on a Microsoft Surface Pro 3 (Intel i7-4650U@1.7Ghz, 8GB DDR3 RAM),
-where time is in seconds:
+performance on a Microsoft Surface Pro 3 (Intel i7-4650U @ 1.7Ghz, 8GB DDR3
+RAM), where time is in seconds:
 ```
 Shoreline obstacle graph [points: 4335 edges: 4335]
 Using 4 worker processes...
