@@ -1,7 +1,7 @@
 # Pyvisgraph - Python Visibility Graph
 
 [![MIT License](https://img.shields.io/badge/license-MIT-007EC7.svg?style=flat)](/LICENSE.txt)
-![PyPI](https://img.shields.io/badge/pypi-not%20released-lightgrey.svg?style=flat)
+![PyPI](https://img.shields.io/badge/pypi-v0.1-brightgreen.svg?style=flat)
 
 Given a set of simple obstacle polygons, build a visibility graph and find
 the shortest path between two points.
@@ -13,24 +13,22 @@ a set of simple obstacle polygons. The visibility graph algorithm (D.T. Lee)
 runs in O(n^2 log n) time. The shortest path is found using Djikstra's
 algorithm.
 
-## Requirements
-* Python >=2.6
-* Pyshp (for reading shapefiles)
 
 ## Installing Pyvisgraph
-Pyvisgraph has not been released yet, so for now it can only be forked.
+```
+$ pip install pyvisgraph
+```
 
 ## Usage
 Here is an example of building a visibility graph given a list of
 simple polygons:
 ```
->>> from vis_graph.vis_graph import VisGraph
->>> from vis_graph.graph import Point
->>> polys = [[Point(0.0,1.0),Point(3.0,1.0),Point(1.5,4.0)],
->>>          [Point(4.0,4.0),Point(7.0,4.0),Point(5.5,8.0)]]
->>> g = VisGraph()
+>>> import pyvisgraph as vg
+>>> polys = [[vg.Point(0.0,1.0), vg.Point(3.0,1.0), vg.Point(1.5,4.0)],
+>>>          [vg.Point(4.0,4.0), vg.Point(7.0,4.0), vg.Point(5.5,8.0)]]
+>>> g = vg.VisGraph()
 >>> g.build(polys)
->>> shortest = g.shortest_path(Point(1.5,0.0), Point(4.0, 6.0))
+>>> shortest = g.shortest_path(vg.Point(1.5,0.0), vg.Point(4.0, 6.0))
 >>> print shortest
 [Point(1.50, 0.00), Point(3.00, 1.00), Point(4.00, 6.00)]
 ```
@@ -48,6 +46,29 @@ add the number of workers (processes) to the `build` method:
 ```
 >>> g.build(polys, workers=4)
 ```
+Pyvisgraph also has some useful helper functions:
+* `g.update([list of Points])`: Updates the visibility graph
+  by checking visibility of each `Point` in the list.
+* `g.point_in_polygon(Point)`: Check if `Point` is in the interior of any of
+  the obstacle polygons. Returns the polygon_id of said polygon, -1 if not
+  inside any polygon.
+* `g.closest_point(Point, polygon_id)`: Return the closest point outside
+  polygon with polygon_id from Point.
+
+## Performance
+Using a shapefile representing world shorelines, Pyvisgraph has the following
+performance on a Microsoft Surface Pro 3 (Intel i7-4650U@1.7Ghz, 8GB DDR3 RAM),
+where time is in seconds:
+```
+Shoreline obstacle graph [points: 4335 edges: 4335]
+Using 4 worker processes...
+Time to create visibility graph: 554.683238029
+Visibility graph edges: 118532
+Time to update visgraph & find shortest path: 1.09287905693
+Shorest path nodes: 19
+Time to find shortest path between existing points: 0.508340835571
+```
+
 For more information about the implementation, see these series of articles:
 * [Distance Tables Part 1: Defining the Problem](https://taipanrex.github.io/2016/09/17/Distance-Tables-Part-1-Defining-the-Problem.html)
 * More to come...
