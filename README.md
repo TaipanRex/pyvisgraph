@@ -9,7 +9,7 @@ the shortest path between two points.
 ![Figure 1](docs/images/graph.png)
 
 Pyvisgraph is a MIT-licensed Python package for building visibility graphs from
-a set of simple obstacle polygons. The visibility graph algorithm (D.T. Lee)
+a list of simple obstacle polygons. The visibility graph algorithm (D.T. Lee)
 runs in O(n^2 log n) time. The shortest path is found using Djikstra's
 algorithm.
 
@@ -55,8 +55,12 @@ Pyvisgraph also has some useful helper functions:
 * `g.closest_point(Point, polygon_id)`: Return the closest point outside
   polygon with polygon_id from Point.
 
-## Performance
-Using a shapefile representing world shorelines, Pyvisgraph has the following
+## Example & performance
+This example uses a shapefile representing world shorelines as obstacles.
+Two vessels were picked randomly and their current location found
+using [AIS](https://en.wikipedia.org/wiki/Automatic_identification_system). Red
+lines are laden voyage legs (carrying cargo) and dotted blue lines are ballast
+legs (no cargo, moving to load destination). Pyvisgraph has the following
 performance on a Microsoft Surface Pro 3 (Intel i7-4650U @ 1.7Ghz, 8GB DDR3
 RAM), where time is in seconds:
 ```
@@ -68,6 +72,11 @@ Time to update visgraph & find shortest path: 1.09287905693
 Shorest path nodes: 19
 Time to find shortest path between existing points: 0.508340835571
 ```
+For one vessel the origin and destination Points were not part of the built
+visibility graph and had to first be computed. For the second vessel, these
+Points were first added to the visibility graph using `update`, then finding
+the shortest path is faster. Using Matplotlib basemap to visualize the routes:
+![Figure 2](docs/images/example.png)
 
 For more information about the implementation, see these series of articles:
 * [Distance Tables Part 1: Defining the Problem](https://taipanrex.github.io/2016/09/17/Distance-Tables-Part-1-Defining-the-Problem.html)
