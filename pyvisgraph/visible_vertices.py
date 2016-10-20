@@ -25,6 +25,8 @@ from __future__ import division
 from math import pi, sqrt, atan, acos
 from graph import Point
 
+INF = 10000
+
 
 def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
     """Returns list of Points in graph visible by point.
@@ -44,17 +46,16 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
     # Initialize open_edges with any intersecting edges on the half line from
     # point along the positive x-axis
     open_edges = []
-    point_inf = Point(float('inf'), point.y)
+    point_inf = Point(INF, point.y)
     for e in edges:
         if point in e: continue
         if edge_intersect(point, point_inf, e):
-            ip = intersect_point(point, point_inf, e)
-            if e.p1.y > ip.y or e.p2.y > ip.y:
-                k = EdgeKey(point, point_inf, e)
-                insort(open_edges, k)
+            if on_segment(point, e.p1, point_inf): continue
+            if on_segment(point, e.p2, point_inf): continue
+            k = EdgeKey(point, point_inf, e)
+            insort(open_edges, k)
 
     visible = []
-    prev_point = None
     for p in points:
         if p == point: continue
         if scan == 'half' and angle(point, p) > pi: break
@@ -65,20 +66,15 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
                 if ccw(point, p, edge.get_adjacent(p)) == -1:
                     k = EdgeKey(point, p, edge)
                     index = bisect(open_edges, k) - 1
-                    if open_edges[index] == k:
+                    if len(open_edges) > 0 and open_edges[index] == k:
                         del open_edges[index]
 
         # Check if p is visible from point
         is_visible = False
-        smallest_edge = None
-        if len(open_edges) > 0:
-            smallest_edge = open_edges[0].edge
-        if not smallest_edge or edge_distance(point, p) <= point_edge_distance(point, p, smallest_edge):
-            if prev_point and angle(point, p) == angle(point, prev_point):
-                if edge_distance(point, p) < edge_distance(point, prev_point):
-                    is_visible = True
-            else:
-                is_visible = True
+        if len(open_edges) == 0:
+            is_visible = True
+        elif not edge_intersect(point, p, open_edges[0].edge):
+            is_visible = True
 
         # Check if the visible edge is interior to its polygon
         if is_visible and p not in graph.get_adjacent_points(point):
@@ -92,29 +88,23 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
                 k = EdgeKey(point, p, edge)
                 insort(open_edges, k)
 
-        prev_point = p
     return visible
 
 
 def polygon_crossing(p1, poly_edges):
-    """Returns True if Point p1 is internal to the polygon
-
-    The polygon is defined by the Edges in poly_edges. Uses crossings
-    algorithm and takes into account edges that are collinear to p1.
-    """
-
-    p2 = Point(float('inf'), p1.y)
+    """Returns True if Point p1 is internal to the polygon The polygon is
+    defined by the Edges in poly_edges. Uses crossings algorithm and takes into
+    account edges that are collinear to p1."""
+    p2 = Point(INF, p1.y)
     intersect_count = 0
     co_flag = False
     co_dir = 0
     for edge in poly_edges:
-        if p1.y < edge.p1.y and p1.y < edge.p2.y:
-            continue
-        if p1.y > edge.p1.y and p1.y > edge.p2.y:
-            continue
-        # collinear points on right side
-        co0 = ccw(p1, edge.p1, p2) == 0 and edge.p1.x > p1.x
-        co1 = ccw(p1, edge.p2, p2) == 0 and edge.p2.x > p1.x
+        if p1.y < edge.p1.y and p1.y < edge.p2.y: continue
+        if p1.y > edge.p1.y and p1.y > edge.p2.y: continue
+        # Deal with points colinear to p1
+        co0 = (ccw(p1, edge.p1, p2) == 0) and (edge.p1.x > p1.x)
+        co1 = (ccw(p1, edge.p2, p2) == 0) and (edge.p2.x > p1.x)
         co_point = edge.p1 if co0 else edge.p2
         if co0 or co1:
             if edge.get_adjacent(co_point).y > p1.y:
@@ -122,7 +112,8 @@ def polygon_crossing(p1, poly_edges):
             else:
                 co_dir -= 1
             if co_flag:
-                if co_dir == 0: intersect_count += 1
+                if co_dir == 0:
+                    intersect_count += 1
                 co_flag = False
                 co_dir = 0
             else:
@@ -151,12 +142,18 @@ def point_in_polygon(p, graph):
     return -1
 
 
+# TODO(TaipanRex): its actually returning a point on the edge, not outside.
 def closest_point(p, graph, polygon_id):
+    """Assumes p is interior to the polygon with polygon_id. Returns the
+    closest point outside the polygon to p. Solution found at
+    http://stackoverflow.com/a/6177788/4896361"""
     polygon_edges = graph.polygons[polygon_id]
     smallest_dist = None
     smallest_point = None
     for i, e in enumerate(polygon_edges):
-        u = ((p.x-e.p1.x)*(e.p2.x-e.p1.x)+(p.y-e.p1.y)*(e.p2.y-e.p1.y))/((e.p2.x - e.p1.x)**2 + (e.p2.y - e.p1.y)**2)
+        num = ((p.x-e.p1.x)*(e.p2.x-e.p1.x)+(p.y-e.p1.y)*(e.p2.y-e.p1.y))
+        denom = ((e.p2.x - e.p1.x)**2 + (e.p2.y - e.p1.y)**2)
+        u = num/denom
         pu = Point(e.p1.x + u*(e.p2.x - e.p1.x), e.p1.y + u*(e.p2.y- e.p1.y))
         pc = pu
         if u < 0:
@@ -172,13 +169,13 @@ def closest_point(p, graph, polygon_id):
 
 def edge_distance(p1, p2):
     """Return the Euclidean distance between two Points."""
-
     return sqrt((p2.x - p1.x)**2 + (p2.y - p1.y)**2)
 
 
 def intersect_point(p1, p2, edge):
     """Return intersect Point where the edge from p1, p2 intersects edge"""
-
+    if p1 in edge: return p1
+    if p2 in edge: return p2
     if edge.p1.x == edge.p2.x:
         if p1.x == p2.x:
             return None
@@ -204,10 +201,7 @@ def intersect_point(p1, p2, edge):
 
 def point_edge_distance(p1, p2, edge):
     """Return the Eucledian distance from p1 to intersect point with edge.
-
-    The line going from p1 to p2 intersects edge before reaching p2.
-    """
-
+    Assumes the line going from p1 to p2 intersects edge before reaching p2."""
     ip = intersect_point(p1, p2, edge)
     if ip is not None:
         return edge_distance(p1, ip)
@@ -216,13 +210,11 @@ def point_edge_distance(p1, p2, edge):
 
 def angle(center, point):
     """Return the angle (radian) of point from center of the radian circle.
-
      ------p
      |   /
      |  /
     c|a/
     """
-
     dx = point.x - center.x
     dy = point.y - center.y
     if dx == 0:
@@ -250,24 +242,48 @@ def angle2(point_a, point_b, point_c):
 
 def ccw(A, B, C):
     """Return 1 if counter clockwise, -1 if clock wise, 0 if collinear """
-
     area = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x)
-    if area > 0: return 1  # counter clock wise
-    if area < 0: return -1  # clock wise
-    return 0  # collinear
+    if area > 0: return 1
+    if area < 0: return -1
+    return 0
 
 
-def edge_intersect(A, B, edge):
+def on_segment(p, q, r):
+    """Given three colinear points p, q, r, the function checks if point q
+    lies on line segment 'pr'."""
+    if (q.x <= max(p.x, r.x)) and (q.x >= min(p.x, r.x)):
+        if (q.y <= max(p.y, r.y)) and (q.y >= min(p.y, r.y)):
+            return True
+    return False
+
+
+def edge_intersect(p1, q1, edge):
     """Return True if edge from A, B interects edge.
+    http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/"""
+    p2 = edge.p1
+    q2 = edge.p2
+    o1 = ccw(p1, q1, p2)
+    o2 = ccw(p1, q1, q2)
+    o3 = ccw(p2, q2, p1)
+    o4 = ccw(p2, q2, q1)
 
-    If edge contains either 'A' or 'B', return False.
-    """
+    # General case
+    if (o1 != o2 and o3 != o4):
+        return True
+    # p1, q1 and p2 are colinear and p2 lies on segment p1q1
+    if o1 == 0 and on_segment(p1, p2, q1):
+        return True
+    # p1, q1 and p2 are colinear and q2 lies on segment p1q1
+    if o2 == 0 and on_segment(p1, q2, q1):
+        return True
+    # p2, q2 and p1 are colinear and p1 lies on segment p2q2
+    if o3 == 0 and on_segment(p2, p1, q2):
+        return True
+    # p2, q2 and q1 are colinear and q1 lies on segment p2q2
+    if o4 == 0 and on_segment(p2, q1, q2):
+        return True
+    return False
 
-    # TODO: May be an issue with colinerity or intersections at vertex points.
-    # http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
-    C = edge.p1
-    D = edge.p2
-    return ccw(A, C, D) != ccw(B, C, D) and ccw(A, B, C) != ccw(A, B, D)
 
 def insort(a, x):
     lo = 0
@@ -287,7 +303,8 @@ def bisect(a, x):
         else: lo = mid+1
     return lo
 
-class EdgeKey:
+
+class EdgeKey(object):
     def __init__(self, p1, p2, edge):
         self.p1 = p1
         self.p2 = p2
