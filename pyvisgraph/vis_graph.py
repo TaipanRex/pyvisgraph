@@ -21,14 +21,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import cPickle as pickle
 from timeit import default_timer
-from sys import stdout
+from sys import stdout, version_info
 from multiprocessing import Pool
 
-from graph import Graph, Edge
-from shortest_path import shortest_path
-from visible_vertices import visible_vertices, point_in_polygon, closest_point
+from pyvisgraph.graph import Graph, Edge
+from pyvisgraph.shortest_path import shortest_path
+from pyvisgraph.visible_vertices import visible_vertices, point_in_polygon
+from pyvisgraph.visible_vertices import closest_point
+
+PYTHON3 = version_info[0] == 3
+if PYTHON3:
+    xrange = range
+    import pickle
+else:
+    import cPickle as pickle
 
 
 class VisGraph(object):
@@ -63,12 +70,12 @@ class VisGraph(object):
 
         self.graph = Graph(input)
         self.visgraph = Graph([])
-        if status: print " " + "[Done][Rem.][Avg t] " * workers
+        if status: print(" " + "[Done][Rem.][Avg t] " * workers)
 
         if workers == 1:
             for edge in _vis_graph(self.graph, self.graph.get_points(), 0, status):
                 self.visgraph.add_edge(edge)
-            if status: print ""
+            if status: print("")
             return None
 
         points = self.graph.get_points()
@@ -80,7 +87,7 @@ class VisGraph(object):
         for result in results.get():
             for edge in result:
                 self.visgraph.add_edge(edge)
-        if status: print ""
+        if status: print("")
 
     def update(self, points, origin=None, destination=None):
         """Update visgraph by checking visibility of Points in list points."""

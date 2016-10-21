@@ -23,7 +23,7 @@ SOFTWARE.
 """
 from __future__ import division
 from math import pi, sqrt, atan, acos
-from graph import Point
+from pyvisgraph.graph import Point
 
 INF = 10000
 
@@ -290,16 +290,17 @@ def insort(a, x):
     hi = len(a)
     while lo < hi:
         mid = (lo+hi)//2
-        if a[mid] > x: hi = mid
+        if x < a[mid]: hi = mid
         else: lo = mid+1
     a.insert(lo, x)
+
 
 def bisect(a, x):
     lo = 0
     hi = len(a)
     while lo < hi:
         mid = (lo+hi)//2
-        if a[mid] > x: hi = mid
+        if x < a[mid]: hi = mid
         else: lo = mid+1
     return lo
 
@@ -310,36 +311,32 @@ class EdgeKey(object):
         self.p2 = p2
         self.edge = edge
 
-    def __cmp__(self, other):
+    def __eq__(self, other):
         if self.edge == other.edge:
-            return 0
-        # if other p2 is in both edges, distance is equal and we need the angle
-        if other.p2 in self.edge:
-            aslf = angle2(other.p1, other.p2, self.edge.get_adjacent(other.p2))
-            aot = angle2(other.p1, other.p2, other.edge.get_adjacent(other.p2))
-            if aot < aslf:
-                return 1
-            return -1
-        # if no intersect with self, self > other
-        if not edge_intersect(other.p1, other.p2, self.edge):
-            return 1
-        # if distance is equal, need to check angle
-        self_dist = point_edge_distance(other.p1, other.p2, self.edge)
-        other_dist = point_edge_distance(other.p1, other.p2, other.edge)
+            return True
+
+    def __lt__(self, other):
+        if self.edge == other.edge:
+            return False
+        if not edge_intersect(self.p1, self.p2, other.edge):
+            return True
+        self_dist = point_edge_distance(self.p1, self.p2, self.edge)
+        other_dist = point_edge_distance(self.p1, self.p2, other.edge)
         if self_dist > other_dist:
-            return 1
+            return False
         if self_dist < other_dist:
-            return -1
-        elif self_dist == other_dist:
-            if self.edge.p1 == other.edge.p1 or self.edge.p1 == other.edge.p2:
+            return True
+        # If the distance is equal, we need to compare on the edge angles.
+        if self_dist == other_dist:
+            if self.edge.p1 in other.edge:
                 same_point = self.edge.p1
-            elif self.edge.p2 == other.edge.p1 or self.edge.p2 == other.edge.p2:
+            elif self.edge.p2 in other.edge:
                 same_point = self.edge.p2
-            aslf = angle2(other.p1, other.p2, self.edge.get_adjacent(same_point))
-            aot = angle2(other.p1, other.p2, other.edge.get_adjacent(same_point))
-            if aot < aslf:
-                return 1
-            return -1
+            aslf = angle2(self.p1, self.p2, self.edge.get_adjacent(same_point))
+            aot = angle2(self.p1, self.p2, other.edge.get_adjacent(same_point))
+            if aslf < aot:
+                return True
+            return False
 
     def __repr__(self):
         reprstring = (self.__class__.__name__, self.edge, self.p1, self.p2)

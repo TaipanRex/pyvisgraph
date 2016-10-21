@@ -1,3 +1,3 @@
 from __future__ import division
-from .graph import Point, Edge, Graph
-from .vis_graph import VisGraph
+from pyvisgraph.graph import Point, Edge, Graph
+from pyvisgraph.vis_graph import VisGraph

@@ -123,7 +123,7 @@ class Graph(object):
         return [edge.get_adjacent(point) for edge in self.graph[point]]
 
     def get_points(self):
-        return self.graph.keys()
+        return list(self.graph)
 
     def get_edges(self):
         return self.edges

@@ -22,7 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from heapq import heapify, heappush, heappop
-from visible_vertices import edge_distance
+from pyvisgraph.visible_vertices import edge_distance
+from six import iteritems
 
 
 def dijkstra(graph, origin, destination=None):
@@ -77,7 +78,7 @@ class priority_dict(dict):
         self._rebuild_heap()
 
     def _rebuild_heap(self):
-        self._heap = [(v, k) for k, v in self.iteritems()]
+        self._heap = [(v, k) for k, v in iteritems(self)]
         heapify(self._heap)
 
     def smallest(self):
