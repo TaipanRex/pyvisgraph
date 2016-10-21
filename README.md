@@ -1,7 +1,7 @@
 # Pyvisgraph - Python Visibility Graph
 
 [![MIT License](https://img.shields.io/badge/license-MIT-007EC7.svg?style=flat)](/LICENSE.txt)
-[![PyPI](https://img.shields.io/badge/pypi-v0.1.1-brightgreen.svg?style=flat)](https://pypi.python.org/pypi/pyvisgraph)
+[![PyPI](https://img.shields.io/badge/pypi-v0.1.2-brightgreen.svg?style=flat)](https://pypi.python.org/pypi/pyvisgraph)
 
 Given a set of simple obstacle polygons, build a visibility graph and find
 the shortest path between two points.

@@ -23,7 +23,17 @@ SOFTWARE.
 """
 from heapq import heapify, heappush, heappop
 from pyvisgraph.visible_vertices import edge_distance
-from six import iteritems
+
+try:
+    dict.iteritems
+except AttributeError:
+    # Python 3
+    def iteritems(d):
+        return iter(d.items())
+else:
+    # Python 2
+    def iteritems(d):
+        return d.iteritems()
 
 
 def dijkstra(graph, origin, destination=None):
