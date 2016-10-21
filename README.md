@@ -1,7 +1,7 @@
 # Pyvisgraph - Python Visibility Graph
 
 [![MIT License](https://img.shields.io/badge/license-MIT-007EC7.svg?style=flat)](/LICENSE.txt)
-[![PyPI](https://img.shields.io/badge/pypi-v0.1-brightgreen.svg?style=flat)](https://pypi.python.org/pypi/pyvisgraph)
+[![PyPI](https://img.shields.io/badge/pypi-v0.2-brightgreen.svg?style=flat)](https://pypi.python.org/pypi/pyvisgraph)
 
 Given a set of simple obstacle polygons, build a visibility graph and find
 the shortest path between two points.
@@ -18,6 +18,7 @@ algorithm.
 ```
 $ pip install pyvisgraph
 ```
+Pyvisgraph supports Python 2 and 3.
 
 ## Usage
 Here is an example of building a visibility graph given a list of
@@ -33,7 +34,7 @@ simple polygons:
 [Point(1.50, 0.00), Point(3.00, 1.00), Point(4.00, 6.00)]
 ```
 Once the visibility graph is built, it can be saved and subsequently loaded.
-This is useful for large graphs where build time is long. `cPickle` is used
+This is useful for large graphs where build time is long. `pickle` is used
 for saving and loading.
 ```
 >>> g.save('graph.pk1')
@@ -80,4 +81,5 @@ the shortest path is faster. Using Matplotlib basemap to visualize the routes:
 
 For more information about the implementation, see these series of articles:
 * [Distance Tables Part 1: Defining the Problem](https://taipanrex.github.io/2016/09/17/Distance-Tables-Part-1-Defining-the-Problem.html)
+* [Distance Tables Part 2: Lee's Visibility Graph Algorithm](https://taipanrex.github.io/2016/10/19/Distance-Tables-Part-2-Lees-Visibility-Graph-Algorithm.html)
 * More to come...
