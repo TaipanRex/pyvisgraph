@@ -134,7 +134,6 @@ def edge_in_polygon(p1, p2, graph):
     return polygon_crossing(mid_point, graph.polygons[p1.polygon_id])
 
 
-# TODO: Check if point is in polygon bounding box first
 def point_in_polygon(p, graph):
     for polygon in graph.polygons:
         if polygon_crossing(p, graph.polygons[polygon]):
@@ -142,7 +141,6 @@ def point_in_polygon(p, graph):
     return -1
 
 
-# TODO(TaipanRex): its actually returning a point on the edge, not outside.
 def closest_point(p, graph, polygon_id):
     """Assumes p is interior to the polygon with polygon_id. Returns the
     closest point outside the polygon to p. Solution found at
