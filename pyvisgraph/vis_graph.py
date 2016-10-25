@@ -126,14 +126,14 @@ class VisGraph(object):
 
         return point_in_polygon(point, self.graph)
 
-    def closest_point(self, point, polygon_id):
+    def closest_point(self, point, polygon_id, length=0.001):
         """Return closest Point outside polygon from point.
 
         Note method assumes point is inside the polygon, no check is
         performed.
         """
 
-        return closest_point(point, self.graph, polygon_id)
+        return closest_point(point, self.graph, polygon_id, length)
 
 
 def _vis_graph_wrapper(args):
