@@ -141,15 +141,23 @@ def point_in_polygon(p, graph):
     return -1
 
 
-def closest_point(p, graph, polygon_id):
+def unit_vector(c, p):
+    magnitude = edge_distance(c, p)
+    return Point((p.x - c.x) / magnitude, (p.y - c.y) / magnitude)
+
+
+def closest_point(p, graph, polygon_id, length=0.001):
     """Assumes p is interior to the polygon with polygon_id. Returns the
-    closest point outside the polygon to p. Solution found at
-    http://stackoverflow.com/a/6177788/4896361"""
+    closest point c outside the polygon to p, where the distance from c to
+    the intersect point from p to the edge of the polygon is length."""
     polygon_edges = graph.polygons[polygon_id]
-    smallest_dist = None
-    smallest_point = None
+    close_point = None
+    close_edge = None
+    close_dist = None
+    # Finds point closest to p, but on a edge of the polygon.
+    # Solution from http://stackoverflow.com/a/6177788/4896361
     for i, e in enumerate(polygon_edges):
-        num = ((p.x-e.p1.x)*(e.p2.x-e.p1.x)+(p.y-e.p1.y)*(e.p2.y-e.p1.y))
+        num = ((p.x-e.p1.x)*(e.p2.x-e.p1.x) + (p.y-e.p1.y)*(e.p2.y-e.p1.y))
         denom = ((e.p2.x - e.p1.x)**2 + (e.p2.y - e.p1.y)**2)
         u = num/denom
         pu = Point(e.p1.x + u*(e.p2.x - e.p1.x), e.p1.y + u*(e.p2.y- e.p1.y))
@@ -159,10 +167,26 @@ def closest_point(p, graph, polygon_id):
         elif u > 1:
             pc = e.p2
         d = edge_distance(p, pc)
-        if i == 0 or d < smallest_dist:
-            smallest_dist = d
-            smallest_point = pc
-    return smallest_point
+        if i == 0 or d < close_dist:
+            close_dist = d
+            close_point = pc
+            close_edge = e
+
+    # Extend the newly found point so it is outside the polygon by `length`.
+    if close_point in close_edge:
+        c = close_edge.p1 if close_point == close_edge.p1 else close_edge.p2
+        edges = graph[c]
+        v1 = unit_vector(c, edges.pop().get_adjacent(c))
+        v2 = unit_vector(c, edges.pop().get_adjacent(c))
+        vsum = unit_vector(Point(0, 0), Point(v1.x + v2.x, v1.y + v2.y))
+        close1 = Point(c.x + (vsum.x * length), c.y + (vsum.y * length))
+        close2 = Point(c.x - (vsum.x * length), c.y - (vsum.y * length))
+        if point_in_polygon(close1, graph) == -1:
+            return close1
+        return close2
+    else:
+        v = unit_vector(p, close_point)
+        return Point(close_point.x + v.x*length, close_point.y + v.y*length)
 
 
 def edge_distance(p1, p2):
