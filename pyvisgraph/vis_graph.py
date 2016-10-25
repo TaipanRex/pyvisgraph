@@ -84,9 +84,13 @@ class VisGraph(object):
                    for i in xrange(0, len(points), batch_size)]
         pool = Pool(workers)
         results = pool.map_async(_vis_graph_wrapper, batches)
-        for result in results.get():
-            for edge in result:
-                self.visgraph.add_edge(edge)
+        try:
+            for result in results.get():
+                for edge in result:
+                    self.visgraph.add_edge(edge)
+        except KeyboardInterrupt:
+            if status: print("")
+            raise
         if status: print("")
 
     def update(self, points, origin=None, destination=None):
@@ -97,7 +101,6 @@ class VisGraph(object):
                                       destination=destination):
                 self.visgraph.add_edge(Edge(p, v))
 
-    # TODO(TaipanRex): visgraph is updated this way, lets find a way to avoid.
     def shortest_path(self, origin, destination):
         """Find and return shortest path between origin and destination.
 
@@ -134,7 +137,10 @@ class VisGraph(object):
 
 
 def _vis_graph_wrapper(args):
-    return _vis_graph(*args)
+    try:
+        return _vis_graph(*args)
+    except KeyboardInterrupt:
+        pass
 
 
 def _vis_graph(graph, points, worker, status):
