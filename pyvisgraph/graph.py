@@ -120,7 +120,7 @@ class Graph(object):
                 pid += 1
 
     def get_adjacent_points(self, point):
-        return [edge.get_adjacent(point) for edge in self.graph[point]]
+        return [edge.get_adjacent(point) for edge in self[point]]
 
     def get_points(self):
         return list(self.graph)
