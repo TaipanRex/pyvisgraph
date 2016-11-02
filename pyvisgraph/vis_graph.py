@@ -105,10 +105,9 @@ class VisGraph(object):
         """Find and return shortest path between origin and destination.
 
         Will return in-order list of Points of the shortest path found. If
-        origin or destination are not in the visibility graph, the graph will
-        first be updated.
-        Note that the visgraph will be updated permanently with the origin
-        and destination visibility if not computed before.
+        origin or destination are not in the visibility graph, their respective
+        visibility edges will be found, but only kept temporarily for finding
+        the shortest path. 
         """
 
         origin_exists = origin in self.visgraph
@@ -117,9 +116,14 @@ class VisGraph(object):
             return shortest_path(self.visgraph, origin, destination)
         orgn = None if origin_exists else origin
         dest = None if dest_exists else destination
-        if not origin_exists: self.update([origin], destination=dest)
-        if not dest_exists: self.update([destination], origin=orgn)
-        return shortest_path(self.visgraph, origin, destination)
+        add_to_visg = Graph([])
+        if not origin_exists:
+            for v in visible_vertices(origin, self.graph, destination=dest):
+                add_to_visg.add_edge(Edge(origin, v))
+        if not dest_exists:
+            for v in visible_vertices(destination, self.graph, origin=orgn):
+                add_to_visg.add_edge(Edge(destination, v))
+        return shortest_path(self.visgraph, origin, destination, add_to_visg)
 
     def point_in_polygon(self, point):
         """Return polygon_id if point in a polygon, -1 otherwise."""

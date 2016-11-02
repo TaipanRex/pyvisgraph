@@ -143,7 +143,7 @@ class Graph(object):
     def __getitem__(self, point):
         if point in self.graph:
             return self.graph[point]
-        return []
+        return set()
 
     def __str__(self):
         res = ""

@@ -70,13 +70,13 @@ class TestVisGraphMethods:
 
     def test_shortest_path_not_update_visgraph(self):
         shortest = self.world.shortest_path(self.origin, self.destination)
-        assert self.origin not in world.visgraph
-        assert self.destination not in world.visgraph
+        assert self.origin not in self.world.visgraph
+        assert self.destination not in self.world.visgraph
 
     def test_shortest_path_not_update_graph(self):
         shortest = self.world.shortest_path(self.origin, self.destination)
-        assert self.origin not in world.graph
-        assert self.destination not in world.graph
+        assert self.origin not in self.world.graph
+        assert self.destination not in self.world.graph
 
     def test_update(self):
         self.world.update([self.origin, self.destination])

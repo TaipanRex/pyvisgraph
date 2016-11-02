@@ -36,7 +36,7 @@ else:
         return d.iteritems()
 
 
-def dijkstra(graph, origin, destination=None):
+def dijkstra(graph, origin, destination, add_to_visgraph):
     D = {}
     P = {}
     Q = priority_dict()
@@ -46,7 +46,10 @@ def dijkstra(graph, origin, destination=None):
         D[v] = Q[v]
         if v == destination: break
 
-        for e in graph[v]:
+        edges = graph[v]
+        if add_to_visgraph != None and len(add_to_visgraph[v]) > 0:
+            edges = add_to_visgraph[v] | graph[v]
+        for e in edges:
             w = e.get_adjacent(v)
             elength = D[v] + edge_distance(v, w)
             if w in D:
@@ -58,8 +61,8 @@ def dijkstra(graph, origin, destination=None):
     return (D, P)
 
 
-def shortest_path(graph, origin, destination):
-    D, P = dijkstra(graph, origin, destination)
+def shortest_path(graph, origin, destination, add_to_visgraph=None):
+    D, P = dijkstra(graph, origin, destination, add_to_visgraph)
     path = []
     while 1:
         path.append(destination)
