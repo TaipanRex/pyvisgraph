@@ -56,6 +56,8 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
             insort(open_edges, k)
 
     visible = []
+    prev = None
+    prev_visible = None
     for p in points:
         if p == point: continue
         if scan == 'half' and angle(point, p) > pi: break
@@ -71,10 +73,25 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
 
         # Check if p is visible from point
         is_visible = False
-        if len(open_edges) == 0:
+        # ...Non-collinear points
+        if prev is None or ccw(point, prev, p) != 0 or not on_segment(point, prev, p):
+            if len(open_edges) == 0:
+                is_visible = True
+            elif not edge_intersect(point, p, open_edges[0].edge):
+                is_visible = True
+        # ...For collinear points, if previous point was not visible, p is not
+        elif not prev_visible:
+            is_visible = False
+        # ...For collinear points, if previous point was visible, need to check
+        # that the edge from prev to p does not intersect any open edge.
+        else:
             is_visible = True
-        elif not edge_intersect(point, p, open_edges[0].edge):
-            is_visible = True
+            for e in open_edges:
+                if prev not in e.edge and edge_intersect(prev, p, e.edge):
+                    is_visible = False
+                    break
+            if is_visible and edge_in_polygon(prev, p, graph):
+                    is_visible = False
 
         # Check if the visible edge is interior to its polygon
         if is_visible and p not in graph.get_adjacent_points(point):
@@ -88,6 +105,8 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
                 k = EdgeKey(point, p, edge)
                 insort(open_edges, k)
 
+        prev = p
+        prev_visible = is_visible
     return visible
 
 
