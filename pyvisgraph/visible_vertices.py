@@ -194,9 +194,9 @@ def closest_point(p, graph, polygon_id, length=0.001):
     # Extend the newly found point so it is outside the polygon by `length`.
     if close_point in close_edge:
         c = close_edge.p1 if close_point == close_edge.p1 else close_edge.p2
-        edges = graph[c]
-        v1 = unit_vector(c, edges.pop().get_adjacent(c))
-        v2 = unit_vector(c, edges.pop().get_adjacent(c))
+        edges = list(graph[c])
+        v1 = unit_vector(c, edges[0].get_adjacent(c))
+        v2 = unit_vector(c, edges[1].get_adjacent(c))
         vsum = unit_vector(Point(0, 0), Point(v1.x + v2.x, v1.y + v2.y))
         close1 = Point(c.x + (vsum.x * length), c.y + (vsum.y * length))
         close2 = Point(c.x - (vsum.x * length), c.y - (vsum.y * length))
