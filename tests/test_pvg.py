@@ -163,30 +163,39 @@ class TestClosestPoint:
 class TestCollinear:
 
     def setup_method(self, method):
-        self.point_a = Point(0,1)
-        self.point_b = Point(1,0)
-        self.point_c = Point(2,3)
-        self.point_d = Point(3,2)
-        self.point_e = Point(3.5,0.5)
-        self.point_f = Point(4.5,3.5)
+        self.point_a = Point(0.0, 1.0)
+        self.point_b = Point(1.0, 0.0)
+        self.point_c = Point(2.0, 3.0)
+        self.point_d = Point(3.0, 2.0)
+        self.point_e = Point(3.5, 0.5)
+        self.point_f = Point(4.5, 3.5)
 
     def test_collin1(self):
         graph = Graph([[self.point_a, self.point_b, self.point_c],
                        [self.point_d, self.point_e, self.point_f]])
         visible = visible_vertices(Point(1,4), graph, None, None)
-        assert visible == [self.point_a, self.point_c, self.point_f]
+        assert visible == [self.point_a, self.point_c, self.point_d, self.point_f]
 
     def test_collin2(self):
-        self.point_g = Point(2,5)
-        self.point_h = Point(3,5)
+        self.point_g = Point(2.0, 5.0)
+        self.point_h = Point(3.0, 5.0)
         graph = Graph([[self.point_g, self.point_h, self.point_c],
                        [self.point_d, self.point_e, self.point_f]])
         visible = visible_vertices(Point(1,4), graph, None, None)
-        assert visible == [self.point_g, self.point_e, self.point_c]
+        assert visible == [self.point_g, self.point_e, self.point_c, self.point_d]
 
     def test_collin3(self):
-        graph = Graph([[Point(0,1), Point(1,0), Point(2,3)],
-                       [Point(2,2), Point(3.5,5), Point(2.5,2)],
-                       [Point(3,2), Point(3.5,0.5), Point(4.5,3.5)]])
+        point_g = Point(2.0, 2.0)
+        point_h = Point(3.5, 5.0)
+        point_i = Point(2.5, 2.0)
+        graph = Graph([[self.point_a, self.point_b, self.point_c],
+                       [point_g, point_h, point_i],
+                       [self.point_d, self.point_e, self.point_f]])
         visible = visible_vertices(Point(1,4), graph, None, None)
-        assert visible == [Point(3.50, 5.00), Point(0.00, 1.00), Point(2.00, 3.00)]
+        assert visible == [point_h, self.point_a, self.point_c]
+
+    def test_collin4(self):
+        graph = Graph([[Point(1,1), Point(2,3), Point(3,1),Point(2,2)],
+                      [Point(2,4)]])
+        visible = visible_vertices(Point(2,1), graph, None, None)
+        assert visible == [Point(3,1), Point(2,2), Point(1,1)]
