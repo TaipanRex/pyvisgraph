@@ -274,11 +274,16 @@ def angle(center, point):
 
 
 def angle2(point_a, point_b, point_c):
-    a = edge_distance(point_b, point_c)
-    b = edge_distance(point_a, point_c)
-    c = edge_distance(point_a, point_b)
-    x = (a**2 + c**2 - b**2) / (2 * a * c)
-    return acos(round(x, 5))
+    """Return angle B (radian) between point_b and point_c.
+           c
+         /  \
+       /    B\
+      a-------b
+    """
+    a = (point_c.x - point_b.x)**2 + (point_c.y - point_b.y)**2
+    b = (point_c.x - point_a.x)**2 + (point_c.y - point_a.y)**2
+    c = (point_b.x - point_a.x)**2 + (point_b.y - point_a.y)**2
+    return acos((a + c - b) / (2 * sqrt(a) * sqrt(c)))
 
 
 def ccw(A, B, C):
