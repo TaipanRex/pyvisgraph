@@ -26,7 +26,7 @@ from pyvisgraph.graph import Graph, Point, Edge
 from pyvisgraph.visible_vertices import edge_intersect, point_edge_distance
 from pyvisgraph.visible_vertices import visible_vertices, angle
 from pyvisgraph.visible_vertices import intersect_point, edge_distance
-from math import pi, degrees
+from math import pi, degrees, cos, sin
 import pyvisgraph as vg
 
 '''
@@ -119,6 +119,7 @@ def test_point_edge_distance_function():
     assert point_edge_distance(point_f, point_g, edge3) == 1.4142135623730951
     assert point_edge_distance(point_h, point_g, edge3) == 0.9428090415820635
 
+
 def test_point_in_polygon():
     g = vg.VisGraph()
     point_a = Point(0,0)
@@ -127,6 +128,7 @@ def test_point_in_polygon():
     point_d = Point(1,0.5)
     g.build([[point_a, point_b, point_c]])
     assert g.point_in_polygon(point_d) != -1
+
 
 class TestClosestPoint:
 
@@ -157,8 +159,8 @@ class TestClosestPoint:
         p = Point(1,0.9)
         pid = g.point_in_polygon(p)
         cp = g.closest_point(p, pid, length=0.001)
-        print(cp)
         assert g.point_in_polygon(cp) == -1
+
 
 class TestCollinear:
 
@@ -199,3 +201,21 @@ class TestCollinear:
                       [Point(2,4)]])
         visible = visible_vertices(Point(2,1), graph, None, None)
         assert visible == [Point(3,1), Point(2,2), Point(1,1)]
+
+    def test_collin5(self):
+        r = 0.2  # Radius of polygon
+        n = 4  # Sides of polygon
+        c = Point(1.0, 1.0)  # Center of polygon
+        verts = []
+        for i in range(n):
+            verts.append(Point(r * cos(2*pi * i/n - pi/4) + c.x,
+                               r * sin(2*pi * i/n - pi/4) + c.y))
+        g = vg.VisGraph()
+        g.build([verts])
+        s = Point(0, 0)
+        t = Point(1.7, 1.7)
+        shortest = g.shortest_path(s, t)
+        visible = visible_vertices(t, g.graph, s, None)
+        assert verts[3] not in visible
+        assert verts[1] not in shortest
+        assert verts[3] not in shortest

@@ -26,7 +26,7 @@ from math import pi, sqrt, atan, acos
 from pyvisgraph.graph import Point
 
 INF = 10000
-
+COLIN_TOLERANCE = 13
 
 def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
     """Returns list of Points in graph visible by point.
@@ -283,7 +283,7 @@ def angle2(point_a, point_b, point_c):
 
 def ccw(A, B, C):
     """Return 1 if counter clockwise, -1 if clock wise, 0 if collinear """
-    area = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x)
+    area = round((B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x), COLIN_TOLERANCE)
     if area > 0: return 1
     if area < 0: return -1
     return 0
