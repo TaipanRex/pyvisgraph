@@ -38,6 +38,13 @@ class Point(object):
     def __ne__(self, point):
         return not self.__eq__(point)
 
+    def __lt__(self, point):
+        """ This is only needed for shortest path calculations where heapq is
+            used. When there are two points of equal distance, heapq will
+            instead evaluate the Points, which doesnt work in Python 3 and
+            throw a TypeError."""
+        return hash(self) < hash(point)
+
     def __str__(self):
         return "(%.2f, %.2f)" % (self.x, self.y)
 
