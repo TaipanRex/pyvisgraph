@@ -26,7 +26,11 @@ from math import pi, sqrt, atan, acos
 from pyvisgraph.graph import Point
 
 INF = 10000
+"""Due to floating point representation error, some functions need to
+   truncate floating point numbers to a certain tolerance."""
 COLIN_TOLERANCE = 13
+T = 10**COLIN_TOLERANCE
+T2 = 10.0**COLIN_TOLERANCE
 
 def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
     """Returns list of Points in graph visible by point.
@@ -288,7 +292,8 @@ def angle2(point_a, point_b, point_c):
 
 def ccw(A, B, C):
     """Return 1 if counter clockwise, -1 if clock wise, 0 if collinear """
-    area = round((B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x), COLIN_TOLERANCE)
+    #  Rounding this way is faster than calling round()
+    area = int(((B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x))*T)/T2
     if area > 0: return 1
     if area < 0: return -1
     return 0
