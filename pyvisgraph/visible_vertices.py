@@ -128,8 +128,8 @@ def polygon_crossing(p1, poly_edges):
         # Deal with points colinear to p1
         co0 = (ccw(p1, edge.p1, p2) == 0) and (edge.p1.x > p1.x)
         co1 = (ccw(p1, edge.p2, p2) == 0) and (edge.p2.x > p1.x)
-        co_point = edge.p1 if co0 else edge.p2
         if co0 and co1: continue
+        co_point = edge.p1 if co0 else edge.p2
         if co0 or co1:
             if edge.get_adjacent(co_point).y > p1.y:
                 co_dir += 1
