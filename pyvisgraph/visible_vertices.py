@@ -288,7 +288,8 @@ def angle2(point_a, point_b, point_c):
     a = (point_c.x - point_b.x)**2 + (point_c.y - point_b.y)**2
     b = (point_c.x - point_a.x)**2 + (point_c.y - point_a.y)**2
     c = (point_b.x - point_a.x)**2 + (point_b.y - point_a.y)**2
-    return acos((a + c - b) / (2 * sqrt(a) * sqrt(c)))
+    cos_value = (a + c - b) / (2 * sqrt(a) * sqrt(c))
+    return acos(int(cos_value*T)/T2)
 
 
 def ccw(A, B, C):
