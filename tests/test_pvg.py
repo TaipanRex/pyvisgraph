@@ -24,7 +24,7 @@ SOFTWARE.
 from __future__ import division
 from pyvisgraph.graph import Graph, Point, Edge
 from pyvisgraph.visible_vertices import edge_intersect, point_edge_distance
-from pyvisgraph.visible_vertices import visible_vertices, angle
+from pyvisgraph.visible_vertices import visible_vertices, angle, point_in_polygon
 from pyvisgraph.visible_vertices import intersect_point, edge_distance
 from math import pi, degrees, cos, sin
 import pyvisgraph as vg
@@ -219,3 +219,48 @@ class TestCollinear:
         assert verts[3] not in visible
         assert verts[1] not in shortest
         assert verts[3] not in shortest
+
+    """ See https://github.com/TaipanRex/pyvisgraph/issues/20.
+    This tests colinearity case #1 using point_in_polygon."""
+    def test_collin6(self):
+        graph = Graph([[Point(0,0), Point(2,1), Point(0,2)]])
+        pip = point_in_polygon(Point(1,1), graph)
+        assert pip > -1
+
+    """ See https://github.com/TaipanRex/pyvisgraph/issues/20.
+    This tests colinearity case #2 using point_in_polygon."""
+    def test_collin7(self):
+        graph = Graph([[Point(0,0), Point(1,1), Point(2,0), Point(2,2), Point(0,2)]])
+        pip = point_in_polygon(Point(0.5,1), graph)
+        assert pip > -1
+
+    """ See https://github.com/TaipanRex/pyvisgraph/issues/20.
+    This tests colinearity case #3 using point_in_polygon."""
+    def test_collin8(self):
+        graph = Graph([[Point(0,0), Point(2,0), Point(2,2), Point(1,1), Point(0,2)]])
+        pip = point_in_polygon(Point(0.5,1), graph)
+        assert pip > -1
+
+    """ See https://github.com/TaipanRex/pyvisgraph/issues/20.
+    This tests colinearity case #4 using point_in_polygon."""
+    def test_collin9(self):
+        graph = Graph([[Point(0,0), Point(1,0), Point(1,1), Point(2,1), Point(2,2),
+                        Point(0,2)]])
+        pip = point_in_polygon(Point(0.5,1), graph)
+        assert pip > -1
+
+    """ See https://github.com/TaipanRex/pyvisgraph/issues/20.
+    This tests colinearity case #5 using point_in_polygon."""
+    def test_collin10(self):
+        graph = Graph([[Point(0,0), Point(1,0), Point(1,1), Point(2,1), Point(2,0),
+                        Point(3,0), Point(3,2), Point(0,2)]])
+        pip = point_in_polygon(Point(0.5,1), graph)
+        assert pip > -1
+
+    """ See https://github.com/TaipanRex/pyvisgraph/issues/20.
+    This tests colinearity case #6 using point_in_polygon."""
+    def test_collin11(self):
+        graph = Graph([[Point(0,0), Point(3,0), Point(3,2), Point(2,3), Point(2,1),
+                        Point(1,1), Point(1,2), Point(0,2)]])
+        pip = point_in_polygon(Point(0.5,1), graph)
+        assert pip > -1
