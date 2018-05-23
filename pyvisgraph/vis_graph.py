@@ -24,6 +24,7 @@ SOFTWARE.
 from timeit import default_timer
 from sys import stdout, version_info
 from multiprocessing import Pool
+from tqdm import tqdm
 
 from pyvisgraph.graph import Graph, Edge
 from pyvisgraph.shortest_path import shortest_path
@@ -70,28 +71,17 @@ class VisGraph(object):
 
         self.graph = Graph(input)
         self.visgraph = Graph([])
-        if status: print(" " + "[Done][Rem.][Avg t] " * workers)
 
-        if workers == 1:
-            for edge in _vis_graph(self.graph, self.graph.get_points(), 0, status):
-                self.visgraph.add_edge(edge)
-            if status: print("")
-            return None
-
+        pool = Pool(workers)
         points = self.graph.get_points()
-        batch_size = int(len(points) / workers)
+        batch_size = 10 # int(len(points) / workers) # Smaller batches are easier to track
         batches = [(self.graph, points[i:i + batch_size], i/batch_size, status)
                    for i in xrange(0, len(points), batch_size)]
-        pool = Pool(workers)
-        results = pool.map_async(_vis_graph_wrapper, batches)
-        try:
-            for result in results.get():
-                for edge in result:
-                    self.visgraph.add_edge(edge)
-        except KeyboardInterrupt:
-            if status: print("")
-            raise
-        if status: print("")
+
+        results = list(tqdm(pool.imap(_vis_graph_wrapper, batches), total=len(batches)))
+        for result in results:
+            for edge in result:
+                self.visgraph.add_edge(edge)
 
     def update(self, points, origin=None, destination=None):
         """Update visgraph by checking visibility of Points in list points."""
@@ -146,21 +136,9 @@ def _vis_graph_wrapper(args):
     except KeyboardInterrupt:
         pass
 
-
 def _vis_graph(graph, points, worker, status):
-    total_points = len(points)
     visible_edges = []
-    if status:
-        t0 = default_timer()
-        points_done = 0
     for p1 in points:
         for p2 in visible_vertices(p1, graph, scan='half'):
             visible_edges.append(Edge(p1, p2))
-        if status:
-            points_done += 1
-            avg_time = round((default_timer() - t0) / points_done, 3)
-            time_stat = (points_done, total_points-points_done, avg_time)
-            status = '\r\033[' + str(21*worker) + 'C[{:4}][{:4}][{:5.3f}] \r'
-            stdout.write(status.format(*time_stat))
-            stdout.flush()
     return visible_edges
