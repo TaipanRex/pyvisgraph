@@ -25,6 +25,7 @@ from timeit import default_timer
 from sys import stdout, version_info
 from multiprocessing import Pool
 from tqdm import tqdm
+from warnings import warn
 
 from pyvisgraph.graph import Graph, Edge
 from pyvisgraph.shortest_path import shortest_path
@@ -55,7 +56,7 @@ class VisGraph(object):
         with open(filename, 'wb') as output:
             pickle.dump((self.graph, self.visgraph), output, -1)
 
-    def build(self, input, workers=1, status=False):
+    def build(self, input, workers=1, **kwargs): 
         """Build visibility graph based on a list of polygons.
 
         The input must be a list of polygons, where each polygon is a list of
@@ -65,9 +66,9 @@ class VisGraph(object):
         Take advantage of processors with multiple cores by setting workers to
         the number of subprocesses you want. Defaults to 1, i.e. no subprocess
         will be started.
-        Set status to True to see progress information for each subprocess:
-        [Points done][Points remaining][average time per Point].
         """
+        if 'status' in kwargs:
+            warn("build() 'status' parameter is deprecated since 0.1.8", DeprecationWarning)
 
         self.graph = Graph(input)
         self.visgraph = Graph([])
@@ -75,7 +76,7 @@ class VisGraph(object):
         pool = Pool(workers)
         points = self.graph.get_points()
         batch_size = 10 # int(len(points) / workers) # Smaller batches are easier to track
-        batches = [(self.graph, points[i:i + batch_size], i/batch_size, status)
+        batches = [(self.graph, points[i:i + batch_size], i/batch_size)
                    for i in xrange(0, len(points), batch_size)]
 
         results = list(tqdm(pool.imap(_vis_graph_wrapper, batches), total=len(batches)))
@@ -136,7 +137,7 @@ def _vis_graph_wrapper(args):
     except KeyboardInterrupt:
         pass
 
-def _vis_graph(graph, points, worker, status):
+def _vis_graph(graph, points, worker):
     visible_edges = []
     for p1 in points:
         for p2 in visible_vertices(p1, graph, scan='half'):
