@@ -38,7 +38,7 @@ class TestVisGraphBuild:
         world.build(self.polys)
         assert len(world.graph.get_points()) == 310
         assert len(world.graph.get_edges()) == 310
-        assert len(world.visgraph.get_edges()) == 1156
+        assert len(world.visgraph.get_edges()) == 1157
         s = "Graph points: {} edges: {}, visgraph edges: {}"
         print(s.format(len(world.graph.get_points()),
                        len(world.graph.get_edges()),
@@ -49,7 +49,7 @@ class TestVisGraphBuild:
         world.build(self.polys, workers=2)
         assert len(world.graph.get_points()) == 310
         assert len(world.graph.get_edges()) == 310
-        assert len(world.visgraph.get_edges()) == 1156
+        assert len(world.visgraph.get_edges()) == 1157
         s = "Graph points: {} edges: {}, visgraph edges: {}"
         print(s.format(len(world.graph.get_points()),
                        len(world.graph.get_edges()),
