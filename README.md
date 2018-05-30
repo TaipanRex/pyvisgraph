@@ -56,6 +56,9 @@ Pyvisgraph also has some useful helper functions:
 * `g.closest_point(Point, polygon_id)`: Return the closest point outside
   polygon with polygon_id from Point.
 
+For further examples, please look at the scripts provided in the `examples`
+folder.
+
 ## Example & performance
 This example uses a shapefile representing world shorelines as obstacles.
 Two vessels were picked randomly and their current location found
