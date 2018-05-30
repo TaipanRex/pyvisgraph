@@ -9,7 +9,7 @@ start_point = vg.Point(12.568337, 55.676098) # Copenhagen
 end_point = vg.Point(103.851959, 1.290270) # Singapore
 
 # Load the visibility graph file If you do not have this, please run
-# build_graphfile_from_shapefiles.py first.
+# 1_build_graph_from_shapefiles.py first.
 graph = vg.VisGraph()
 graph.load('GSHHS_c_L1.graph')
 
