@@ -76,13 +76,14 @@ class VisGraph(object):
         batch_size = 10 
 
         if workers == 1:
-            for batch in tqdm([points[i:i + batch_size] for i in xrange(0, len(points), batch_size)],
-                    disable=not status):
-                for edge in _vis_graph(self.graph, batch, 0):
+            for batch in tqdm([points[i:i + batch_size]
+                               for i in xrange(0, len(points), batch_size)],
+                            disable=not status):
+                for edge in _vis_graph(self.graph, batch):
                     self.visgraph.add_edge(edge)
         else:
             pool = Pool(workers)
-            batches = [(self.graph, points[i:i + batch_size], i/batch_size)
+            batches = [(self.graph, points[i:i + batch_size])
                        for i in xrange(0, len(points), batch_size)]
 
             results = list(tqdm(pool.imap(_vis_graph_wrapper, batches), total=len(batches),
@@ -144,7 +145,7 @@ def _vis_graph_wrapper(args):
     except KeyboardInterrupt:
         pass
 
-def _vis_graph(graph, points, worker):
+def _vis_graph(graph, points):
     visible_edges = []
     for p1 in points:
         for p2 in visible_vertices(p1, graph, scan='half'):
