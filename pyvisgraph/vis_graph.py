@@ -73,16 +73,22 @@ class VisGraph(object):
         self.graph = Graph(input)
         self.visgraph = Graph([])
 
-        pool = Pool(workers)
         points = self.graph.get_points()
-        batch_size = 10 # int(len(points) / workers) # Smaller batches are easier to track
-        batches = [(self.graph, points[i:i + batch_size], i/batch_size)
-                   for i in xrange(0, len(points), batch_size)]
+        batch_size = 10 
 
-        results = list(tqdm(pool.imap(_vis_graph_wrapper, batches), total=len(batches)))
-        for result in results:
-            for edge in result:
-                self.visgraph.add_edge(edge)
+        if workers == 1:
+            for batch in tqdm([points[i:i + batch_size] for i in xrange(0, len(points), batch_size)]):
+                for edge in _vis_graph(self.graph, batch, 0):
+                    self.visgraph.add_edge(edge)
+        else:
+            pool = Pool(workers)
+            batches = [(self.graph, points[i:i + batch_size], i/batch_size)
+                       for i in xrange(0, len(points), batch_size)]
+
+            results = list(tqdm(pool.imap(_vis_graph_wrapper, batches), total=len(batches)))
+            for result in results:
+                for edge in result:
+                    self.visgraph.add_edge(edge)
 
     def update(self, points, origin=None, destination=None):
         """Update visgraph by checking visibility of Points in list points."""
