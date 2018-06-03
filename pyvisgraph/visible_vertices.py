@@ -51,13 +51,13 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
     # point along the positive x-axis
     open_edges = []
     point_inf = Point(INF, point.y)
-    for e in edges:
-        if point in e: continue
-        if edge_intersect(point, point_inf, e):
-            if on_segment(point, e.p1, point_inf): continue
-            if on_segment(point, e.p2, point_inf): continue
-            k = EdgeKey(point, point_inf, e)
-            insort(open_edges, k)
+    for edge in edges:
+        if point in edge: continue
+        if edge_intersect(point, point_inf, edge):
+            if on_segment(point, edge.p1, point_inf): continue
+            if on_segment(point, edge.p2, point_inf): continue
+            key = EdgeKey(point, point_inf, edge)
+            insort(open_edges, key)
 
     visible = []
     prev = None
@@ -70,9 +70,9 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
         if open_edges:
             for edge in graph[p]:
                 if ccw(point, p, edge.get_adjacent(p)) == -1:
-                    k = EdgeKey(point, p, edge)
-                    index = bisect(open_edges, k) - 1
-                    if len(open_edges) > 0 and open_edges[index] == k:
+                    key = EdgeKey(point, p, edge)
+                    index = bisect(open_edges, key) - 1
+                    if open_edges[index] == key:
                         del open_edges[index]
 
         # Check if p is visible from point
@@ -106,8 +106,8 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
         # Add counter clock wise edges incident on p to open_edges
         for edge in graph[p]:
             if (point not in edge) and ccw(point, p, edge.get_adjacent(p)) == 1:
-                k = EdgeKey(point, p, edge)
-                insort(open_edges, k)
+                key = EdgeKey(point, p, edge)
+                insort(open_edges, key)
 
         prev = p
         prev_visible = is_visible
@@ -115,7 +115,7 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
 
 
 def polygon_crossing(p1, poly_edges):
-    """Returns True if Point p1 is internal to the polygon The polygon is
+    """Returns True if Point p1 is internal to the polygon. The polygon is
     defined by the Edges in poly_edges. Uses crossings algorithm and takes into
     account edges that are collinear to p1."""
     p2 = Point(INF, p1.y)
