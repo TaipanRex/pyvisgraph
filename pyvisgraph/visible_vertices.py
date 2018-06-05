@@ -49,15 +49,14 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
 
     # Initialize open_edges with any intersecting edges on the half line from
     # point along the positive x-axis
-    open_edges = []
+    open_edges = OpenEdges()
     point_inf = Point(INF, point.y)
     for edge in edges:
         if point in edge: continue
         if edge_intersect(point, point_inf, edge):
             if on_segment(point, edge.p1, point_inf): continue
             if on_segment(point, edge.p2, point_inf): continue
-            key = EdgeKey(point, point_inf, edge)
-            insort(open_edges, key)
+            open_edges.insert(point, point_inf, edge)
 
     visible = []
     prev = None
@@ -70,10 +69,7 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
         if open_edges:
             for edge in graph[p]:
                 if ccw(point, p, edge.get_adjacent(p)) == -1:
-                    key = EdgeKey(point, p, edge)
-                    index = bisect(open_edges, key) - 1
-                    if open_edges[index] == key:
-                        del open_edges[index]
+                    open_edges.delete(point, p, edge)
 
         # Check if p is visible from point
         is_visible = False
@@ -81,7 +77,7 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
         if prev is None or ccw(point, prev, p) != 0 or not on_segment(point, prev, p):
             if len(open_edges) == 0:
                 is_visible = True
-            elif not edge_intersect(point, p, open_edges[0].edge):
+            elif not edge_intersect(point, p, open_edges.smallest()):
                 is_visible = True
         # ...For collinear points, if previous point was not visible, p is not
         elif not prev_visible:
@@ -90,8 +86,8 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
         # that the edge from prev to p does not intersect any open edge.
         else:
             is_visible = True
-            for e in open_edges:
-                if prev not in e.edge and edge_intersect(prev, p, e.edge):
+            for edge in open_edges:
+                if prev not in edge and edge_intersect(prev, p, edge):
                     is_visible = False
                     break
             if is_visible and edge_in_polygon(prev, p, graph):
@@ -106,8 +102,7 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
         # Add counter clock wise edges incident on p to open_edges
         for edge in graph[p]:
             if (point not in edge) and ccw(point, p, edge.get_adjacent(p)) == 1:
-                key = EdgeKey(point, p, edge)
-                insort(open_edges, key)
+                open_edges.insert(point, p, edge)
 
         prev = p
         prev_visible = is_visible
@@ -338,59 +333,58 @@ def edge_intersect(p1, q1, edge):
     return False
 
 
-def insort(a, x):
-    lo = 0
-    hi = len(a)
-    while lo < hi:
-        mid = (lo+hi)//2
-        if x < a[mid]: hi = mid
-        else: lo = mid+1
-    a.insert(lo, x)
+class OpenEdges(object):
+    def __init__(self):
+        self._open_edges = []
 
+    def insert(self, p1, p2, edge):
+        self._open_edges.insert(self._index(p1, p2, edge), edge)
 
-def bisect(a, x):
-    lo = 0
-    hi = len(a)
-    while lo < hi:
-        mid = (lo+hi)//2
-        if x < a[mid]: hi = mid
-        else: lo = mid+1
-    return lo
+    def delete(self, p1, p2, edge):
+        index = self._index(p1, p2, edge) - 1
+        if self._open_edges[index] == edge:
+            del self._open_edges[index]
 
+    def smallest(self):
+        return self._open_edges[0]
 
-class EdgeKey(object):
-    def __init__(self, p1, p2, edge):
-        self.p1 = p1
-        self.p2 = p2
-        self.edge = edge
-
-    def __eq__(self, other):
-        if self.edge == other.edge:
-            return True
-
-    def __lt__(self, other):
-        if self.edge == other.edge:
+    def _less_than(self, p1, p2, edge1, edge2):
+        """Return True if edge1 is smaller than edge2, False otherwise."""
+        if edge1 == edge2:
             return False
-        if not edge_intersect(self.p1, self.p2, other.edge):
+        if not edge_intersect(p1, p2, edge2):
             return True
-        self_dist = point_edge_distance(self.p1, self.p2, self.edge)
-        other_dist = point_edge_distance(self.p1, self.p2, other.edge)
-        if self_dist > other_dist:
+        edge1_dist = point_edge_distance(p1, p2, edge1)
+        edge2_dist = point_edge_distance(p1, p2, edge2)
+        if edge1_dist > edge2_dist:
             return False
-        if self_dist < other_dist:
+        if edge1_dist < edge2_dist:
             return True
         # If the distance is equal, we need to compare on the edge angles.
-        if self_dist == other_dist:
-            if self.edge.p1 in other.edge:
-                same_point = self.edge.p1
-            elif self.edge.p2 in other.edge:
-                same_point = self.edge.p2
-            aslf = angle2(self.p1, self.p2, self.edge.get_adjacent(same_point))
-            aot = angle2(self.p1, self.p2, other.edge.get_adjacent(same_point))
-            if aslf < aot:
+        if edge1_dist == edge2_dist:
+            if edge1.p1 in edge2:
+                same_point = edge1.p1
+            else:
+                same_point = edge1.p2
+            angle_edge1 = angle2(p1, p2, edge1.get_adjacent(same_point))
+            angle_edge2 = angle2(p1, p2, edge2.get_adjacent(same_point))
+            if angle_edge1 < angle_edge2:
                 return True
             return False
 
-    def __repr__(self):
-        reprstring = (self.__class__.__name__, self.edge, self.p1, self.p2)
-        return "{}(Edge={!r}, p1={!r}, p2={!r})".format(*reprstring)
+    def _index(self, p1, p2, edge):
+        lo = 0
+        hi = len(self._open_edges)
+        while lo < hi:
+            mid = (lo+hi)//2
+            if self._less_than(p1, p2, edge, self._open_edges[mid]):
+                hi = mid
+            else:
+                lo = mid + 1
+        return lo
+
+    def __len__(self):
+        return len(self._open_edges)
+
+    def __getitem__(self, index):
+        return self._open_edges[index]
