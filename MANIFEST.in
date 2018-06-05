@@ -5,3 +5,6 @@ include CONTRIBUTING.md
 include setup.py
 include setup.cfg
 include README.md
+include examples/1_build_graph_from_shapefiles.py
+include examples/2_calculate_shortest_distance.py
+include examples/3_plot_path_on_interactive_map.py
