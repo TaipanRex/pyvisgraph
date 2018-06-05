@@ -243,7 +243,7 @@ of larger more cohesive commits. You can do this with an interactive rebase:
 
 ```shell
 # Rebase all commits on your development branch
-git checkout 
+git checkout ft/newfeature
 git rebase -i master
 ```
 
