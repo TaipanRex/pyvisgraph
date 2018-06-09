@@ -120,9 +120,10 @@ def polygon_crossing(p1, poly_edges):
     for edge in poly_edges:
         if p1.y < edge.p1.y and p1.y < edge.p2.y: continue
         if p1.y > edge.p1.y and p1.y > edge.p2.y: continue
+        if p1.x > edge.p1.x and p1.x > edge.p2.x: continue
         # Deal with points colinear to p1
-        co0 = (ccw(p1, edge.p1, p2) == 0) and (edge.p1.x > p1.x)
-        co1 = (ccw(p1, edge.p2, p2) == 0) and (edge.p2.x > p1.x)
+        co0 = (ccw(p1, edge.p1, p2) == 0)
+        co1 = (ccw(p1, edge.p2, p2) == 0)
         if co0 and co1: continue
         co_point = edge.p1 if co0 else edge.p2
         if co0 or co1:
