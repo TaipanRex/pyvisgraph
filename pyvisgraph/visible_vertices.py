@@ -26,6 +26,9 @@ from math import pi, sqrt, atan, acos
 from pyvisgraph.graph import Point
 
 INF = 10000
+CCW = 1
+CW = -1
+COLLINEAR = 0
 """Due to floating point representation error, some functions need to
    truncate floating point numbers to a certain tolerance."""
 COLIN_TOLERANCE = 10
@@ -68,13 +71,13 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
         # Remove clock wise edges incident on p
         if open_edges:
             for edge in graph[p]:
-                if ccw(point, p, edge.get_adjacent(p)) == -1:
+                if ccw(point, p, edge.get_adjacent(p)) == CW:
                     open_edges.delete(point, p, edge)
 
         # Check if p is visible from point
         is_visible = False
         # ...Non-collinear points
-        if prev is None or ccw(point, prev, p) != 0 or not on_segment(point, prev, p):
+        if prev is None or ccw(point, prev, p) != COLLINEAR or not on_segment(point, prev, p):
             if len(open_edges) == 0:
                 is_visible = True
             elif not edge_intersect(point, p, open_edges.smallest()):
@@ -101,7 +104,7 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
 
         # Add counter clock wise edges incident on p to open_edges
         for edge in graph[p]:
-            if (point not in edge) and ccw(point, p, edge.get_adjacent(p)) == 1:
+            if (point not in edge) and ccw(point, p, edge.get_adjacent(p)) == CCW:
                 open_edges.insert(point, p, edge)
 
         prev = p
@@ -120,8 +123,8 @@ def polygon_crossing(p1, poly_edges):
         if p1.y > edge.p1.y and p1.y > edge.p2.y: continue
         if p1.x > edge.p1.x and p1.x > edge.p2.x: continue
         # Deal with points collinear to p1
-        edge_p1_collinear = (ccw(p1, edge.p1, p2) == 0)
-        edge_p2_collinear = (ccw(p1, edge.p2, p2) == 0)
+        edge_p1_collinear = (ccw(p1, edge.p1, p2) == COLLINEAR)
+        edge_p2_collinear = (ccw(p1, edge.p2, p2) == COLLINEAR)
         if edge_p1_collinear and edge_p2_collinear: continue
         if edge_p1_collinear or edge_p2_collinear:
             collinear_point = edge.p1 if edge_p1_collinear else edge.p2
@@ -309,16 +312,16 @@ def edge_intersect(p1, q1, edge):
     if (o1 != o2 and o3 != o4):
         return True
     # p1, q1 and p2 are colinear and p2 lies on segment p1q1
-    if o1 == 0 and on_segment(p1, p2, q1):
+    if o1 == COLLINEAR and on_segment(p1, p2, q1):
         return True
     # p1, q1 and p2 are colinear and q2 lies on segment p1q1
-    if o2 == 0 and on_segment(p1, q2, q1):
+    if o2 == COLLINEAR and on_segment(p1, q2, q1):
         return True
     # p2, q2 and p1 are colinear and p1 lies on segment p2q2
-    if o3 == 0 and on_segment(p2, p1, q2):
+    if o3 == COLLINEAR and on_segment(p2, p1, q2):
         return True
     # p2, q2 and q1 are colinear and q1 lies on segment p2q2
-    if o4 == 0 and on_segment(p2, q1, q2):
+    if o4 == COLLINEAR and on_segment(p2, q1, q2):
         return True
     return False
 
