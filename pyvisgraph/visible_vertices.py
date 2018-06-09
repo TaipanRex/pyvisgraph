@@ -68,7 +68,7 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
         if p == point: continue
         if scan == 'half' and angle(point, p) > pi: break
 
-        # Remove clock wise edges incident on p
+        # Update open_edges - remove clock wise edges incident on p
         if open_edges:
             for edge in graph[p]:
                 if ccw(point, p, edge.get_adjacent(p)) == CW:
@@ -102,7 +102,7 @@ def visible_vertices(point, graph, origin=None, destination=None, scan='full'):
 
         if is_visible: visible.append(p)
 
-        # Add counter clock wise edges incident on p to open_edges
+        # Update open_edges - Add counter clock wise edges incident on p
         for edge in graph[p]:
             if (point not in edge) and ccw(point, p, edge.get_adjacent(p)) == CCW:
                 open_edges.insert(point, p, edge)
@@ -138,6 +138,8 @@ def polygon_crossing(p1, poly_edges):
 
 
 def edge_in_polygon(p1, p2, graph):
+    """Return true if the edge from p1 to p2 is interior to any polygon
+    in graph."""
     if p1.polygon_id != p2.polygon_id:
         return False
     if p1.polygon_id == -1 or p2.polygon_id == -1:
@@ -147,6 +149,7 @@ def edge_in_polygon(p1, p2, graph):
 
 
 def point_in_polygon(p, graph):
+    """Return true if the point p is interior to any polygon in graph."""
     for polygon in graph.polygons:
         if polygon_crossing(p, graph.polygons[polygon]):
             return polygon
