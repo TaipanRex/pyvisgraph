@@ -115,29 +115,18 @@ def polygon_crossing(p1, poly_edges):
     account edges that are collinear to p1."""
     p2 = Point(INF, p1.y)
     intersect_count = 0
-    co_flag = False
-    co_dir = 0
     for edge in poly_edges:
         if p1.y < edge.p1.y and p1.y < edge.p2.y: continue
         if p1.y > edge.p1.y and p1.y > edge.p2.y: continue
         if p1.x > edge.p1.x and p1.x > edge.p2.x: continue
-        # Deal with points colinear to p1
-        co0 = (ccw(p1, edge.p1, p2) == 0)
-        co1 = (ccw(p1, edge.p2, p2) == 0)
-        if co0 and co1: continue
-        co_point = edge.p1 if co0 else edge.p2
-        if co0 or co1:
-            if edge.get_adjacent(co_point).y > p1.y:
-                co_dir += 1
-            else:
-                co_dir -= 1
-            if co_flag:
-                if co_dir == 0:
-                    intersect_count += 1
-                co_flag = False
-                co_dir = 0
-            else:
-                co_flag = True
+        # Deal with points collinear to p1
+        edge_p1_collinear = (ccw(p1, edge.p1, p2) == 0)
+        edge_p2_collinear = (ccw(p1, edge.p2, p2) == 0)
+        if edge_p1_collinear and edge_p2_collinear: continue
+        if edge_p1_collinear or edge_p2_collinear:
+            collinear_point = edge.p1 if edge_p1_collinear else edge.p2
+            if edge.get_adjacent(collinear_point).y > p1.y:
+                intersect_count += 1
         elif edge_intersect(p1, p2, edge):
             intersect_count += 1
     if intersect_count % 2 == 0:
